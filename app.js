@@ -61,7 +61,7 @@ class TriangleApp {
 
   handleMouseLeave(event) {
     if (this.triangle)
-      this.triangle.flickeringSides.clear();
+      this.triangle.flickeringEdges.clear();
   }
 
   correctAnswers = 0;
@@ -76,26 +76,26 @@ class TriangleApp {
       const mouseX = (event.clientX - rect.left) * scaleX;
       const mouseY = (event.clientY - rect.top) * scaleY;
 
-      // Check proximity to update flickeringSides
+      // Check proximity to update flickeringEdges
       this.triangle.checkMouseProximity(mouseX, mouseY);
 
 
-      // Log the number of sides in proximity
-      const sidesInProximity = this.triangle.flickeringSides.size;
+      // Log the number of edges in proximity
+      const edgesInProximity = this.triangle.flickeringEdges.size;
 
-      // If only one side is in proximity, log which one
-      if (sidesInProximity !== 1)
+      // If only one edge is in proximity, log which one
+      if (edgesInProximity !== 1)
         return;
 
       this.totalAnswers++;
 
-      this.triangle.answer = Array.from(this.triangle.flickeringSides)[0];
-      this.triangle.flickeringSides.clear();
+      this.triangle.answer = Array.from(this.triangle.flickeringEdges)[0];
+      this.triangle.flickeringEdges.clear();
 
       if (this.triangle.answer === 'hypotenuse') {
         this.goodChime();
         this.badBadChime();
-      } else if (!this.triangle.hasOtherSides) {
+      } else if (!this.triangle.hasOtherEdges) {
         const isCorrect = //
           (this.triangle.questionType === 'sin' && this.triangle.answer === 'opposite') ||
           (this.triangle.questionType === 'cos' && this.triangle.answer === 'adjacent');

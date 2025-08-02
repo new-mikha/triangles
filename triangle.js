@@ -1,7 +1,7 @@
 class Triangle {
   constructor() {
     this.generateRandomTriangle();
-    this.flickeringSides = new Set();
+    this.flickeringEdges = new Set();
     this.flickerState = true;
     this.lastFlickerTime = 0;
   }
@@ -19,7 +19,7 @@ class Triangle {
 
     // Random size (not too small, not too large)
     this.size = 200 + Math.random() * 120;
-    this.hasOtherSides = Math.random() < 0.5;
+    this.hasOtherEdges = Math.random() < 0.5;
 
     // Random rotation
     //this.rotation = 25 * Math.PI / 180;
@@ -52,8 +52,8 @@ class Triangle {
     this.colors.opposite2 = colors[1];
 
     // Greek letter for angle
-    const greekLetters = ['α', 'β', 'γ', 'θ', 'δ', 'ε'];
-    this.angleLabel = greekLetters[Math.floor(Math.random() * greekLetters.length)];
+    const allGreekLetters = ['α', 'β', 'γ', 'θ', 'ε', 'δ', 'ϕ', 'χ', 'ω'];
+    this.angleLabel = allGreekLetters[Math.floor(Math.random() * allGreekLetters.length)];
 
     // Generate random question type (sin or cos)
     this.questionType = Math.random() < 0.5 ? 'sin' : 'cos';
@@ -74,7 +74,7 @@ class Triangle {
       { x: 0, y: opposite }  // Opposite leg end
     ];
 
-    if (this.hasOtherSides) {
+    if (this.hasOtherEdges) {
       basePoints.push({ x: adjacent, y: opposite });
     }
 
@@ -122,49 +122,49 @@ class Triangle {
     return this.distanceToLine(point.x, point.y, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y);
   }
 
-  // Check if mouse is near any side
+  // Check if mouse is near any edge
   checkMouseProximity(mouseX, mouseY) {
     if (this.answer) {
-      this.flickeringSides.clear();
+      this.flickeringEdges.clear();
       return;
     }
 
     const errorRange = 10;
-    const newFlickeringSides = new Set();
+    const newFlickeringEdges = new Set();
 
     // Check adjacent leg (points[0] to points[1])
     if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[0], this.points[1]) <= errorRange) {
-      newFlickeringSides.add('adjacent');
+      newFlickeringEdges.add('adjacent');
     }
 
     // Check opposite leg (points[0] to points[2])
     if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[0], this.points[2]) <= errorRange) {
-      newFlickeringSides.add('opposite');
+      newFlickeringEdges.add('opposite');
     }
 
     // Check hypotenuse (points[1] to points[2])
     if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[1], this.points[2]) <= errorRange) {
-      newFlickeringSides.add('hypotenuse');
+      newFlickeringEdges.add('hypotenuse');
     }
 
-    if (this.hasOtherSides) {
+    if (this.hasOtherEdges) {
       // Check adjacent leg2 
       if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[3], this.points[2]) <= errorRange) {
-        newFlickeringSides.add('adjacent2');
+        newFlickeringEdges.add('adjacent2');
       }
 
       // Check opposite leg2 
       if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[3], this.points[1]) <= errorRange) {
-        newFlickeringSides.add('opposite2');
+        newFlickeringEdges.add('opposite2');
       }
     }
 
-    this.flickeringSides = newFlickeringSides;
+    this.flickeringEdges = newFlickeringEdges;
   }
 
   // Update flicker animation
   updateFlicker(currentTime) {
-    if (this.flickeringSides.size > 0) {
+    if (this.flickeringEdges.size > 0) {
       if (currentTime - this.lastFlickerTime > 150) { // Twice per second (500ms interval)
         this.flickerState = !this.flickerState;
         this.lastFlickerTime = currentTime;
@@ -178,11 +178,11 @@ class Triangle {
     // Update flicker animation
     this.updateFlicker(Date.now());
 
-    // Draw the triangle sides
+    // Draw the triangle edges
     ctx.lineWidth = 3;
 
     // Adjacent leg
-    if (!this.flickeringSides.has('adjacent') || this.flickerState) {
+    if (!this.flickeringEdges.has('adjacent') || this.flickerState) {
       ctx.strokeStyle = this.colors.adjacent;
       if (this.answer === 'adjacent')
         ctx.setLineDash([5, 5]);
@@ -194,7 +194,7 @@ class Triangle {
     }
 
     // Opposite leg
-    if (!this.flickeringSides.has('opposite') || this.flickerState) {
+    if (!this.flickeringEdges.has('opposite') || this.flickerState) {
       ctx.strokeStyle = this.colors.opposite;
       if (this.answer === 'opposite')
         ctx.setLineDash([5, 5]);
@@ -206,7 +206,7 @@ class Triangle {
     }
 
     // Hypotenuse
-    if (!this.flickeringSides.has('hypotenuse') || this.flickerState) {
+    if (!this.flickeringEdges.has('hypotenuse') || this.flickerState) {
       if (this.answer === 'hypotenuse')
         ctx.setLineDash([5, 5]);
 
@@ -219,9 +219,9 @@ class Triangle {
     }
 
 
-    if (this.hasOtherSides) {
+    if (this.hasOtherEdges) {
       // Adjacent leg2
-      if (!this.flickeringSides.has('adjacent2') || this.flickerState) {
+      if (!this.flickeringEdges.has('adjacent2') || this.flickerState) {
         ctx.strokeStyle = this.colors.adjacent2;
         if (this.answer === 'adjacent2')
           ctx.setLineDash([5, 5]);
@@ -233,7 +233,7 @@ class Triangle {
       }
 
       // Opposite leg2
-      if (!this.flickeringSides.has('opposite2') || this.flickerState) {
+      if (!this.flickeringEdges.has('opposite2') || this.flickerState) {
         ctx.strokeStyle = this.colors.opposite2;
         if (this.answer === 'opposite2')
           ctx.setLineDash([5, 5]);
