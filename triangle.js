@@ -1,12 +1,15 @@
 class Triangle {
   constructor() {
-    this.generateRandomTriangle();
-    this.flickeringEdges = new Set();
-    this.flickerState = true;
-    this.lastFlickerTime = 0;
+    this.questionType = Math.random() < 0.5 ? 'sin' : 'cos';
+    // Greek letter for angle
+    const allGreekLetters = ['α', 'β', 'γ', 'θ', 'ε', 'δ', 'ϕ', 'χ', 'ω'];
+    this.angleLabel = allGreekLetters[Math.floor(Math.random() * allGreekLetters.length)];
+    this.hasOtherEdges = Math.random() < 0.5;
+
+    this.initialize();
   }
 
-  generateRandomTriangle() {
+  initialize() {
     const canvas = document.getElementById('canvas');
 
     // Set canvas size to match container
@@ -18,54 +21,46 @@ class Triangle {
     const canvasHeight = canvas.height;
 
     // Random size (not too small, not too large)
-    this.size = 200 + Math.random() * 120;
-    this.hasOtherEdges = Math.random() < 0.5;
+    const size = 200 + Math.random() * 120;
 
     // Random rotation
-    //this.rotation = 25 * Math.PI / 180;
-    this.rotation = Math.random() * 2 * Math.PI;
+    //rotation = 25 * Math.PI / 180;
+    const rotation = Math.random() * 2 * Math.PI;
 
     // Random position (keeping triangle within visible area)
     const margin = Math.min(100, Math.min(canvasWidth, canvasHeight) * 0.1);
-    const triangleSize = this.size;
+    const triangleSize = size;
     const maxOffset = triangleSize + margin;
 
-    this.centerX = maxOffset + Math.random() * (canvasWidth - 2 * maxOffset);
-    this.centerY = maxOffset + Math.random() * (canvasHeight - 2 * maxOffset);
+    const centerX = maxOffset + Math.random() * (canvasWidth - 2 * maxOffset);
+    const centerY = maxOffset + Math.random() * (canvasHeight - 2 * maxOffset);
 
     // Random angle for the right triangle (between 20 and 70 degrees)
-    this.angleA = (10 + Math.random() * 70) * Math.PI / 180;
-
-    // Color assignments - ensure no repetition
-    const colors = ['red', 'green', 'blue'];
-    colors.sort(() => Math.random() - 0.5);
-    this.colors = {
-      adjacent: colors[0],
-      opposite: colors[1],
-      hypotenuse: colors[2],
-      adjacent2: colors[0],
-      opposite2: colors[1],
-    };
-
-    colors.sort(() => Math.random() - 0.5);
-    this.colors.adjacent2 = colors[0];
-    this.colors.opposite2 = colors[1];
-
-    // Greek letter for angle
-    const allGreekLetters = ['α', 'β', 'γ', 'θ', 'ε', 'δ', 'ϕ', 'χ', 'ω'];
-    this.angleLabel = allGreekLetters[Math.floor(Math.random() * allGreekLetters.length)];
+    const angleA = (10 + Math.random() * 70) * Math.PI / 180;
 
     // Generate random question type (sin or cos)
-    this.questionType = Math.random() < 0.5 ? 'sin' : 'cos';
+    const edgeLabels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    edgeLabels.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < edgeLabels.length; i++) {
+      if (Math.random() < 0.3)
+        edgeLabels[i] = edgeLabels[i].toUpperCase();
+    }
 
-    // Calculate triangle points
-    this.calculatePoints();
-  }
+    // Color assignments - ensure no repetition
+    const colorsArray = ['red', 'green', 'blue'];
+    const colors = {};
+    colorsArray.sort(() => Math.random() - 0.5);
+    colors.adjacent = colorsArray[0];
+    colors.opposite = colorsArray[1];
+    colors.hypotenuse = colorsArray[2];
+    colorsArray.sort(() => Math.random() - 0.5);
+    colors.adjacent2 = colorsArray[0];
+    colors.opposite2 = colorsArray[1];
 
-  calculatePoints() {
+
     // Calculate the three points of the triangle
-    const adjacent = this.size * Math.cos(this.angleA);
-    const opposite = this.size * Math.sin(this.angleA);
+    const adjacent = size * Math.cos(angleA);
+    const opposite = size * Math.sin(angleA);
 
     // Base points before rotation
     const basePoints = [
@@ -79,230 +74,72 @@ class Triangle {
     }
 
     // Apply rotation and translation
-    this.points = basePoints.map(point => {
-      const rotatedX = point.x * Math.cos(this.rotation) - point.y * Math.sin(this.rotation);
-      const rotatedY = point.x * Math.sin(this.rotation) + point.y * Math.cos(this.rotation);
+    const points = basePoints.map(point => {
+      const rotatedX = point.x * Math.cos(rotation) - point.y * Math.sin(rotation);
+      const rotatedY = point.x * Math.sin(rotation) + point.y * Math.cos(rotation);
       return {
-        x: rotatedX + this.centerX,
-        y: rotatedY + this.centerY
+        x: rotatedX + centerX,
+        y: rotatedY + centerY
       };
     });
-  }
 
-  distanceToLine(X, Y, X1, Y1, X2, Y2) {
-    const numerator = Math.abs((Y2 - Y1) * X - (X2 - X1) * Y + X2 * Y1 - Y2 * X1);
-    const denominator = Math.hypot(Y2 - Y1, X2 - X1); // same as sqrt((Y2-Y1)^2 + (X2-X1)^2)
-    return numerator / denominator;
-  }
+    this.edges = [
+      new Edge('adjacent', points[0], points[1], edgeLabels[0], colors.adjacent),
+      new Edge('opposite', points[0], points[2], edgeLabels[1], colors.opposite),
+      new Edge('hypotenuse', points[1], points[2], edgeLabels[2], colors.hypotenuse),
+    ];
 
-  dotProduct(a, b) {
-    return a.x * b.x + a.y * b.y;
-  }
-
-  pointRelativeToA(p, a, b) {
-    const ap = { x: p.x - a.x, y: p.y - a.y };
-    const ab = { x: b.x - a.x, y: b.y - a.y };
-
-    // console.log(`ap: ${ap.x}, ${ap.y}`);
-    // console.log(`ab: ${ab.x}, ${ab.y}`);
-
-    return this.dotProduct(ap, ab);
-  }
-
-  isPointWithinSegment(p, a, b) {
-    return this.pointRelativeToA(p, a, b) > 0 && this.pointRelativeToA(p, b, a) > 0;
-  }
-
-  // Calculate distance from point to line segment
-  distanceToLineSegment(point, lineStart, lineEnd) {
-    if (!this.isPointWithinSegment(point, lineStart, lineEnd)) {
-      return NaN;
+    if (this.hasOtherEdges) {
+      this.edges.push(new Edge('adjacent2', points[3], points[2], edgeLabels[3], colors.adjacent2));
+      this.edges.push(new Edge('opposite2', points[3], points[1], edgeLabels[4], colors.opposite2));
     }
 
-    return this.distanceToLine(point.x, point.y, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y);
+    this.angleArc = new AngleArc(points[1], rotation, angleA, this.angleLabel);
+    this.angleBracket = new AngleBracket(points[0], rotation);
   }
+
 
   // Check if mouse is near any edge
   checkMouseProximity(mouseX, mouseY) {
-    if (this.answer) {
-      this.flickeringEdges.clear();
+    if (this.answer)
       return;
-    }
 
-    const errorRange = 10;
-    const newFlickeringEdges = new Set();
-
-    // Check adjacent leg (points[0] to points[1])
-    if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[0], this.points[1]) <= errorRange) {
-      newFlickeringEdges.add('adjacent');
-    }
-
-    // Check opposite leg (points[0] to points[2])
-    if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[0], this.points[2]) <= errorRange) {
-      newFlickeringEdges.add('opposite');
-    }
-
-    // Check hypotenuse (points[1] to points[2])
-    if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[1], this.points[2]) <= errorRange) {
-      newFlickeringEdges.add('hypotenuse');
-    }
-
-    if (this.hasOtherEdges) {
-      // Check adjacent leg2 
-      if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[3], this.points[2]) <= errorRange) {
-        newFlickeringEdges.add('adjacent2');
-      }
-
-      // Check opposite leg2 
-      if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[3], this.points[1]) <= errorRange) {
-        newFlickeringEdges.add('opposite2');
-      }
-    }
-
-    this.flickeringEdges = newFlickeringEdges;
+    for (const edge of this.edges)
+      edge.checkMouseProximity(mouseX, mouseY);
   }
 
-  // Update flicker animation
-  updateFlicker(currentTime) {
-    if (this.flickeringEdges.size > 0) {
-      if (currentTime - this.lastFlickerTime > 150) { // Twice per second (500ms interval)
-        this.flickerState = !this.flickerState;
-        this.lastFlickerTime = currentTime;
-      }
-    } else {
-      this.flickerState = true;
-    }
+  handleMouseLeave() {
+    for (const edge of this.edges)
+      edge.handleMouseLeave();
   }
 
   draw(ctx) {
-    // Update flicker animation
-    this.updateFlicker(Date.now());
+    for (const edge of this.edges)
+      edge.draw(ctx);
 
-    // Draw the triangle edges
-    ctx.lineWidth = 3;
+    this.angleArc.draw(ctx);
+    this.angleBracket.draw(ctx);
+  }
 
-    // Adjacent leg
-    if (!this.flickeringEdges.has('adjacent') || this.flickerState) {
-      ctx.strokeStyle = this.colors.adjacent;
-      if (this.answer === 'adjacent')
-        ctx.setLineDash([5, 5]);
-      ctx.beginPath();
-      ctx.moveTo(this.points[0].x, this.points[0].y);
-      ctx.lineTo(this.points[1].x, this.points[1].y);
-      ctx.stroke();
-      ctx.setLineDash([]); // Reset to solid line
-    }
+  handleMouseClick(mouseX, mouseY) {
+    if (this.answer)
+      return;
 
-    // Opposite leg
-    if (!this.flickeringEdges.has('opposite') || this.flickerState) {
-      ctx.strokeStyle = this.colors.opposite;
-      if (this.answer === 'opposite')
-        ctx.setLineDash([5, 5]);
-      ctx.beginPath();
-      ctx.moveTo(this.points[0].x, this.points[0].y);
-      ctx.lineTo(this.points[2].x, this.points[2].y);
-      ctx.stroke();
-      ctx.setLineDash([]); // Reset to solid line
-    }
-
-    // Hypotenuse
-    if (!this.flickeringEdges.has('hypotenuse') || this.flickerState) {
-      if (this.answer === 'hypotenuse')
-        ctx.setLineDash([5, 5]);
-
-      ctx.strokeStyle = this.colors.hypotenuse;
-      ctx.beginPath();
-      ctx.moveTo(this.points[1].x, this.points[1].y);
-      ctx.lineTo(this.points[2].x, this.points[2].y);
-      ctx.stroke();
-      ctx.setLineDash([]); // Reset to solid line
-    }
-
-
-    if (this.hasOtherEdges) {
-      // Adjacent leg2
-      if (!this.flickeringEdges.has('adjacent2') || this.flickerState) {
-        ctx.strokeStyle = this.colors.adjacent2;
-        if (this.answer === 'adjacent2')
-          ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(this.points[3].x, this.points[3].y);
-        ctx.lineTo(this.points[2].x, this.points[2].y);
-        ctx.stroke();
-        ctx.setLineDash([]); // Reset to solid line
-      }
-
-      // Opposite leg2
-      if (!this.flickeringEdges.has('opposite2') || this.flickerState) {
-        ctx.strokeStyle = this.colors.opposite2;
-        if (this.answer === 'opposite2')
-          ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(this.points[3].x, this.points[3].y);
-        ctx.lineTo(this.points[1].x, this.points[1].y);
-        ctx.stroke();
-        ctx.setLineDash([]); // Reset to solid line
+    let selectedCount = 0;
+    let selectedEdge = null;
+    for (const edge of this.edges) {
+      edge.checkMouseProximity(mouseX, mouseY);
+      if (edge.isFlickering) {
+        selectedCount++;
+        selectedEdge = edge;
       }
     }
 
+    if(selectedCount !== 1)
+      return;
 
-    // Draw angle arc
-    this.drawAngleArc(ctx);
-
-    // Draw angle label
-    this.drawAngleLabel(ctx);
-  }
-
-  drawAngleArc(ctx) {
-    const arcRadius = (this.angleA > Math.PI / 2 * 0.7) ? 20 : 40;
-
-    // Draw arc at the angle between hypotenuse and adjacent leg (point 1)
-    const endAngle = Math.PI + this.rotation;
-    const startAngle = endAngle - this.angleA;
-
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(this.points[1].x, this.points[1].y, arcRadius, startAngle, endAngle);
-    ctx.stroke();
-
-
-    const labelRadius = arcRadius + 15;
-    const labelAngle = (startAngle + endAngle) / 2;
-    const labelX = this.points[1].x + labelRadius * Math.cos(labelAngle);
-    const labelY = this.points[1].y + labelRadius * Math.sin(labelAngle);
-
-
-    ctx.fillStyle = 'black';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(this.angleLabel, labelX, labelY);
-  }
-
-  drawAngleLabel(ctx) {
-    const size = 15
-    const square = [[size, 0], [size, size], [0, size]];
-
-    // Rotate square points by this.rotation
-    for (let i = 0; i < square.length; i++) {
-      const rotatedX = square[i][0] * Math.cos(this.rotation) - square[i][1] * Math.sin(this.rotation);
-      const rotatedY = square[i][0] * Math.sin(this.rotation) + square[i][1] * Math.cos(this.rotation);
-      square[i][0] = rotatedX;
-      square[i][1] = rotatedY;
-    }
-
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(this.points[0].x + square[0][0], this.points[0].y + square[0][1]);
-    ctx.lineTo(this.points[0].x + square[1][0], this.points[0].y + square[1][1]);
-    ctx.lineTo(this.points[0].x + square[2][0], this.points[0].y + square[2][1]);
-    ctx.stroke();
-
-    ctx.fillStyle = 'black';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
+    selectedEdge.makeAnswer();
+    this.answer = selectedEdge.name;
   }
 }
 

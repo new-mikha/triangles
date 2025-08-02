@@ -46,6 +46,28 @@ class TriangleApp {
     this.canvas.addEventListener('click', this.handleMouseClick.bind(this));
   }
 
+
+  generateNewTriangle() {
+    this.triangle = new Triangle();
+    this.triangles.push(this.triangle);
+    this.current = this.triangles.length - 1;
+
+    this.updateQuestion();
+  }
+
+  updateQuestion() {
+    const currentLabel = document.getElementById('currrentLabel');
+    const countLabel = document.getElementById('countLabel');
+    currentLabel.innerHTML = this.current + 1;
+    countLabel.innerHTML = this.triangles.length;
+
+    const questionText = document.getElementById('questionText');
+    const questionType = this.triangle.questionType;
+    const angleLabel = this.triangle.angleLabel;
+
+    questionText.innerHTML = `Which leg corresponds to <span class="bold-text">${questionType} ${angleLabel}</span>?`;
+  }
+
   handleMouseMove(event) {
     if (this.triangle && !this.triangle.answer) {
       const rect = this.canvas.getBoundingClientRect();
@@ -61,7 +83,7 @@ class TriangleApp {
 
   handleMouseLeave(event) {
     if (this.triangle)
-      this.triangle.flickeringEdges.clear();
+      this.triangle.handleMouseLeave();
   }
 
   correctAnswers = 0;
@@ -76,21 +98,15 @@ class TriangleApp {
       const mouseX = (event.clientX - rect.left) * scaleX;
       const mouseY = (event.clientY - rect.top) * scaleY;
 
-      // Check proximity to update flickeringEdges
-      this.triangle.checkMouseProximity(mouseX, mouseY);
+      if(this.triangle.answer)
+        return;
 
+      this.triangle.handleMouseClick(mouseX, mouseY);
 
-      // Log the number of edges in proximity
-      const edgesInProximity = this.triangle.flickeringEdges.size;
-
-      // If only one edge is in proximity, log which one
-      if (edgesInProximity !== 1)
+      if(!this.triangle.answer)
         return;
 
       this.totalAnswers++;
-
-      this.triangle.answer = Array.from(this.triangle.flickeringEdges)[0];
-      this.triangle.flickeringEdges.clear();
 
       if (this.triangle.answer === 'hypotenuse') {
         this.goodChime();
@@ -158,13 +174,6 @@ class TriangleApp {
   current = 0;
 
 
-  generateNewTriangle() {
-    this.triangle = new Triangle();
-    this.triangles.push(this.triangle);
-    this.current = this.triangles.length - 1;
-
-    this.updateQuestion();
-  }
 
   goBack() {
     if (this.current > 0) {
@@ -180,19 +189,6 @@ class TriangleApp {
       this.triangle = this.triangles[this.current];
       this.updateQuestion();
     }
-  }
-
-  updateQuestion() {
-    const currentLabel = document.getElementById('currrentLabel');
-    const countLabel = document.getElementById('countLabel');
-    currentLabel.innerHTML = this.current + 1;
-    countLabel.innerHTML = this.triangles.length;
-
-    const questionText = document.getElementById('questionText');
-    const questionType = this.triangle.questionType;
-    const angleLabel = this.triangle.angleLabel;
-
-    questionText.innerHTML = `Which leg corresponds to <span class="bold-text">${questionType} ${angleLabel}</span>?`;
   }
 
   startAnimation() {
