@@ -25,6 +25,22 @@
       background-color: #ffffff;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .left-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .right-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 20em;
     }
 
     .drawing-area {
@@ -83,16 +99,22 @@
     button:active {
       background-color: #004085;
     }
+
   </style>
 </head>
 
 <body>
   <div class="container">
     <div class="button-area">
-      <button id="newBtn" autofocus>New</button>
-      <button id="backBtn">Back</button>
-      <span id="currrentLabel">1</span> / <span id="countLabel">1</span>
-      <button id="nextBtn">Next</button>
+      <div class="left-controls">
+        <button id="newBtn" autofocus>New</button>
+        <button id="backBtn">Back</button>
+        <span>Pages: <span id="currrentLabel">1</span> / <span id="countLabel">1</span></span>
+        <button id="nextBtn">Next</button>
+      </div>
+      <div class="right-controls">
+        <span>Answers: <span id="correctAnswersLabel">0</span> / <span id="totalAnswersLabel">0</span></span>
+      </div>
     </div>
 
     <div class="drawing-area">

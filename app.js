@@ -64,6 +64,9 @@ class TriangleApp {
       this.triangle.flickeringSides.clear();
   }
 
+  correctAnswers = 0;
+  totalAnswers = 0;
+
   handleMouseClick(event) {
     if (this.triangle && !this.triangle.answer) {
       const rect = this.canvas.getBoundingClientRect();
@@ -84,6 +87,8 @@ class TriangleApp {
       if (sidesInProximity !== 1)
         return;
 
+      this.totalAnswers++;
+
       this.triangle.answer = Array.from(this.triangle.flickeringSides)[0];
       this.triangle.flickeringSides.clear();
 
@@ -96,6 +101,7 @@ class TriangleApp {
           (this.triangle.questionType === 'cos' && this.triangle.answer === 'adjacent');
 
         if (isCorrect) {
+          this.correctAnswers++;
           this.goodChime();
         } else {
           this.badChime();
@@ -107,10 +113,16 @@ class TriangleApp {
 
         if (isCorrect) {
           this.goodChime();
+          this.correctAnswers++;
         } else {
           this.badChime();
         }
       }
+
+      const correctAnswersLabel = document.getElementById('correctAnswersLabel');
+      const totalAnswersLabel = document.getElementById('totalAnswersLabel');
+      correctAnswersLabel.innerHTML = this.correctAnswers;
+      totalAnswersLabel.innerHTML = this.totalAnswers;
 
       setTimeout(() => {
         this.generateNewTriangle();
