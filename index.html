@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triangle Math App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+
+    .container {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .button-area {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .drawing-area {
+      background-color: #f0f0f0;
+      width: 100%;
+      height: calc(100vh - 80px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    #canvas {
+      display: block;
+      background-color: #f0f0f0;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .question-overlay {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .question-text {
+      font-size: 18px;
+      color: #333;
+      margin: 0;
+    }
+
+    .bold-text {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:active {
+      background-color: #004085;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="button-area">
+      <button id="newBtn" autofocus>New</button>
+      <button id="backBtn">Back</button>
+      <span id="currrentLabel">1</span> / <span id="countLabel">1</span>
+      <button id="nextBtn">Next</button>
+    </div>
+
+    <div class="drawing-area">
+      <div class="question-overlay">
+        <div class="question-text" id="questionText">
+          Which leg corresponds to <span class="bold-text">sin θ</span>?
+        </div>
+      </div>
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+
+  <script src="utils.js"></script>
+  <script src="triangle.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
