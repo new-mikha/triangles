@@ -19,6 +19,7 @@ class Triangle {
 
     // Random size (not too small, not too large)
     this.size = 200 + Math.random() * 120;
+    this.hasOtherSides = Math.random() < 0.5;
 
     // Random rotation
     //this.rotation = 25 * Math.PI / 180;
@@ -37,12 +38,18 @@ class Triangle {
 
     // Color assignments - ensure no repetition
     const colors = ['red', 'green', 'blue'];
-    const shuffledColors = colors.sort(() => Math.random() - 0.5);
+    colors.sort(() => Math.random() - 0.5);
     this.colors = {
-      adjacent: shuffledColors[0],
-      opposite: shuffledColors[1],
-      hypotenuse: shuffledColors[2]
+      adjacent: colors[0],
+      opposite: colors[1],
+      hypotenuse: colors[2],
+      adjacent2: colors[0],
+      opposite2: colors[1],
     };
+
+    colors.sort(() => Math.random() - 0.5);
+    this.colors.adjacent2 = colors[0];
+    this.colors.opposite2 = colors[1];
 
     // Greek letter for angle
     const greekLetters = ['α', 'β', 'γ', 'θ', 'δ', 'ε'];
@@ -59,7 +66,6 @@ class Triangle {
     // Calculate the three points of the triangle
     const adjacent = this.size * Math.cos(this.angleA);
     const opposite = this.size * Math.sin(this.angleA);
-    const hypotenuse = Math.sqrt(adjacent * adjacent + opposite * opposite);
 
     // Base points before rotation
     const basePoints = [
@@ -67,6 +73,10 @@ class Triangle {
       { x: adjacent, y: 0 }, // Adjacent leg end
       { x: 0, y: opposite }  // Opposite leg end
     ];
+
+    if (this.hasOtherSides) {
+      basePoints.push({ x: adjacent, y: opposite });
+    }
 
     // Apply rotation and translation
     this.points = basePoints.map(point => {
@@ -77,13 +87,6 @@ class Triangle {
         y: rotatedY + this.centerY
       };
     });
-
-    // Store the sides for future use
-    this.sides = {
-      adjacent: adjacent,
-      opposite: opposite,
-      hypotenuse: hypotenuse
-    };
   }
 
   distanceToLine(X, Y, X1, Y1, X2, Y2) {
@@ -144,6 +147,18 @@ class Triangle {
       newFlickeringSides.add('hypotenuse');
     }
 
+    if (this.hasOtherSides) {
+      // Check adjacent leg2 
+      if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[3], this.points[2]) <= errorRange) {
+        newFlickeringSides.add('adjacent2');
+      }
+
+      // Check opposite leg2 
+      if (this.distanceToLineSegment({ x: mouseX, y: mouseY }, this.points[3], this.points[1]) <= errorRange) {
+        newFlickeringSides.add('opposite2');
+      }
+    }
+
     this.flickeringSides = newFlickeringSides;
   }
 
@@ -202,6 +217,34 @@ class Triangle {
       ctx.stroke();
       ctx.setLineDash([]); // Reset to solid line
     }
+
+
+    if (this.hasOtherSides) {
+      // Adjacent leg2
+      if (!this.flickeringSides.has('adjacent2') || this.flickerState) {
+        ctx.strokeStyle = this.colors.adjacent2;
+        if (this.answer === 'adjacent2')
+          ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(this.points[3].x, this.points[3].y);
+        ctx.lineTo(this.points[2].x, this.points[2].y);
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset to solid line
+      }
+
+      // Opposite leg2
+      if (!this.flickeringSides.has('opposite2') || this.flickerState) {
+        ctx.strokeStyle = this.colors.opposite2;
+        if (this.answer === 'opposite2')
+          ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(this.points[3].x, this.points[3].y);
+        ctx.lineTo(this.points[1].x, this.points[1].y);
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset to solid line
+      }
+    }
+
 
     // Draw angle arc
     this.drawAngleArc(ctx);

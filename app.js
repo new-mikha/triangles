@@ -90,10 +90,20 @@ class TriangleApp {
       if (this.triangle.answer === 'hypotenuse') {
         this.goodChime();
         this.badBadChime();
-      } else {
+      } else if (!this.triangle.hasOtherSides) {
         const isCorrect = //
           (this.triangle.questionType === 'sin' && this.triangle.answer === 'opposite') ||
           (this.triangle.questionType === 'cos' && this.triangle.answer === 'adjacent');
+
+        if (isCorrect) {
+          this.goodChime();
+        } else {
+          this.badChime();
+        }
+      } else {
+        const isCorrect =
+          (this.triangle.questionType === 'sin' && this.triangle.answer === 'opposite2') ||
+          (this.triangle.questionType === 'cos' && this.triangle.answer === 'adjacent2');
 
         if (isCorrect) {
           this.goodChime();
