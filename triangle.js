@@ -5,12 +5,14 @@ class Triangle {
     const allGreekLetters = ['α', 'β', 'γ', 'θ', 'ε', 'δ', 'ϕ', 'χ', 'ω'];
     this.angleLabel = allGreekLetters[Math.floor(Math.random() * allGreekLetters.length)];
     this.hasOtherEdges = Math.random() < 0.5;
+    // Random rotation
+    //rotation = 25 * Math.PI / 180;
+    this.rotation = Math.random() * 2 * Math.PI;
 
-    this.initialize();
-  }
-
-  initialize() {
     const canvas = document.getElementById('canvas');
+
+    // Random size (not too small, not too large)
+    this.size = 200 + Math.random() * 120;
 
     // Set canvas size to match container
     const container = canvas.parentElement;
@@ -20,47 +22,53 @@ class Triangle {
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
-    // Random size (not too small, not too large)
-    const size = 200 + Math.random() * 120;
-
-    // Random rotation
-    //rotation = 25 * Math.PI / 180;
-    const rotation = Math.random() * 2 * Math.PI;
-
     // Random position (keeping triangle within visible area)
     const margin = Math.min(100, Math.min(canvasWidth, canvasHeight) * 0.1);
-    const triangleSize = size;
-    const maxOffset = triangleSize + margin;
 
-    const centerX = maxOffset + Math.random() * (canvasWidth - 2 * maxOffset);
-    const centerY = maxOffset + Math.random() * (canvasHeight - 2 * maxOffset);
+    const maxOffset = this.size + margin;
+
+    this.centerX = maxOffset + Math.random() * (canvasWidth - 2 * maxOffset);
+    this.centerY = maxOffset + Math.random() * (canvasHeight - 2 * maxOffset);
+
 
     // Random angle for the right triangle (between 20 and 70 degrees)
-    const angleA = (10 + Math.random() * 70) * Math.PI / 180;
+    this.angleA = (10 + Math.random() * 70) * Math.PI / 180;
 
     // Generate random question type (sin or cos)
-    const edgeLabels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-    edgeLabels.sort(() => Math.random() - 0.5);
-    for (let i = 0; i < edgeLabels.length; i++) {
+    this.edgeLabels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    this.edgeLabels.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < this.edgeLabels.length; i++) {
       if (Math.random() < 0.3)
-        edgeLabels[i] = edgeLabels[i].toUpperCase();
+        this.edgeLabels[i] = this.edgeLabels[i].toUpperCase();
     }
 
     // Color assignments - ensure no repetition
     const colorsArray = ['red', 'green', 'blue'];
-    const colors = {};
+    this.colors = {};
     colorsArray.sort(() => Math.random() - 0.5);
-    colors.adjacent = colorsArray[0];
-    colors.opposite = colorsArray[1];
-    colors.hypotenuse = colorsArray[2];
+    this.colors.adjacent = colorsArray[0];
+    this.colors.opposite = colorsArray[1];
+    this.colors.hypotenuse = colorsArray[2];
     colorsArray.sort(() => Math.random() - 0.5);
-    colors.adjacent2 = colorsArray[0];
-    colors.opposite2 = colorsArray[1];
+    this.colors.adjacent2 = colorsArray[0];
+    this.colors.opposite2 = colorsArray[1];
+
+    this.calcPositions();
+  }
 
 
+  rotate(angle) {
+    this.rotation += angle;
+    this.rotation = Math.round(this.rotation / (Math.PI / 20)) * (Math.PI / 20);
+    this.rotation = this.rotation % (2 * Math.PI);
+    this.calcPositions();
+  }
+
+
+  calcPositions() {
     // Calculate the three points of the triangle
-    const adjacent = size * Math.cos(angleA);
-    const opposite = size * Math.sin(angleA);
+    const adjacent = this.size * Math.cos(this.angleA);
+    const opposite = this.size * Math.sin(this.angleA);
 
     // Base points before rotation
     const basePoints = [
@@ -75,27 +83,29 @@ class Triangle {
 
     // Apply rotation and translation
     const points = basePoints.map(point => {
-      const rotatedX = point.x * Math.cos(rotation) - point.y * Math.sin(rotation);
-      const rotatedY = point.x * Math.sin(rotation) + point.y * Math.cos(rotation);
+      const rotatedX = point.x * Math.cos(this.rotation) - point.y * Math.sin(this.rotation);
+      const rotatedY = point.x * Math.sin(this.rotation) + point.y * Math.cos(this.rotation);
       return {
-        x: rotatedX + centerX,
-        y: rotatedY + centerY
+        x: rotatedX + this.centerX,
+        y: rotatedY + this.centerY
       };
     });
 
+    const realCenter = { x: (points[0].x + points[1].x + points[2].x) / 3, y: (points[0].y + points[1].y + points[2].y) / 3 };
+
     this.edges = [
-      new Edge('adjacent', points[0], points[1], edgeLabels[0], colors.adjacent),
-      new Edge('opposite', points[0], points[2], edgeLabels[1], colors.opposite),
-      new Edge('hypotenuse', points[1], points[2], edgeLabels[2], colors.hypotenuse),
+      new Edge('adjacent', points[0], points[1], this.edgeLabels[0], this.colors.adjacent, realCenter),
+      new Edge('opposite', points[0], points[2], this.edgeLabels[1], this.colors.opposite, realCenter),
+      new Edge('hypotenuse', points[1], points[2], this.edgeLabels[2], this.colors.hypotenuse, realCenter),
     ];
 
     if (this.hasOtherEdges) {
-      this.edges.push(new Edge('adjacent2', points[3], points[2], edgeLabels[3], colors.adjacent2));
-      this.edges.push(new Edge('opposite2', points[3], points[1], edgeLabels[4], colors.opposite2));
+      this.edges.push(new Edge('adjacent2', points[3], points[2], this.edgeLabels[3], this.colors.adjacent2, realCenter));
+      this.edges.push(new Edge('opposite2', points[3], points[1], this.edgeLabels[4], this.colors.opposite2, realCenter));
     }
 
-    this.angleArc = new AngleArc(points[1], rotation, angleA, this.angleLabel);
-    this.angleBracket = new AngleBracket(points[0], rotation);
+    this.angleArc = new AngleArc(points[1], this.rotation, this.angleA, this.angleLabel);
+    this.angleBracket = new AngleBracket(points[0], this.rotation);
   }
 
 
@@ -135,7 +145,7 @@ class Triangle {
       }
     }
 
-    if(selectedCount !== 1)
+    if (selectedCount !== 1)
       return;
 
     selectedEdge.makeAnswer();

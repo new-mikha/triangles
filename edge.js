@@ -20,16 +20,27 @@ function isPointWithinSegment(p, a, b) {
 }
 
 class Edge {
-  constructor(name, start, end, label, color) {
+  constructor(name, start, end, label, color, triangleCenter) {
     this.name = name;
     this.start = start;
     this.end = end;
     this.label = label;
     this.color = color;
+    this.center = triangleCenter;
 
     this.isFullOn = true;
     this.isFlickering = false;
     this.lastFlickerTime = 0;
+
+    const r = 10;
+    const midpoint = { x: (this.start.x + this.end.x) / 2, y: (this.start.y + this.end.y) / 2 };
+    const segmentVector = { x: this.end.x - this.start.x, y: this.end.y - this.start.y };
+    const length = Math.hypot(segmentVector.x, segmentVector.y);
+    const normalPerpendicular = { x: -segmentVector.y / length, y: segmentVector.x / length };
+    const centerSide = Math.sign((this.center.x - this.start.x) * (this.end.y - this.start.y) - (this.center.y - this.start.y) * (this.end.x - this.start.x));
+
+    this.labelPoint = { x: midpoint.x + r * centerSide * normalPerpendicular.x, y: midpoint.y + r * centerSide * normalPerpendicular.y };
+
   }
 
   draw(ctx) {
@@ -37,7 +48,6 @@ class Edge {
 
     ctx.lineWidth = 3;
 
-    // Adjacent leg
     if (this.isFullOn) {
       ctx.strokeStyle = this.color;
       if (this.isAnswer)
@@ -48,6 +58,12 @@ class Edge {
       ctx.stroke();
       ctx.setLineDash([]); // Reset to solid line
     }
+
+    ctx.fillStyle = 'black';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.label, this.labelPoint.x, this.labelPoint.y);
   }
 
   updateFlicker() {

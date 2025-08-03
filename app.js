@@ -38,6 +38,15 @@ class TriangleApp {
       if (event.key === 'ArrowRight') {
         this.goNext();
       }
+
+      if (event.key === 'ArrowUp') {
+        this.triangle.rotate(-Math.PI / 20);
+      }
+
+      if (event.key === 'ArrowDown') {
+        this.triangle.rotate(Math.PI / 20);
+      }
+
     });
 
     // Mouse event listeners for hover detection

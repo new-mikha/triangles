@@ -6,3 +6,5 @@ function degToRad(deg) {
 function radToDeg(rad) {
   return rad * 180 / Math.PI;
 }
+
+const DEGREES_SYMBOL = '°';
