@@ -74,7 +74,7 @@ class TriangleApp {
     const questionType = this.triangle.questionType;
     const angleLabel = this.triangle.angleLabel;
 
-    questionText.innerHTML = `Which leg corresponds to <span class="bold-text">${questionType} ${angleLabel}</span>?`;
+    questionText.innerHTML = this.triangle.questionText;
   }
 
   handleMouseMove(event) {
@@ -107,8 +107,31 @@ class TriangleApp {
       const mouseX = (event.clientX - rect.left) * scaleX;
       const mouseY = (event.clientY - rect.top) * scaleY;
 
-      if(this.triangle.answer)
+      const answer = this.triangle.tryAnswer(mouseX, mouseY);
+
+      if (answer === "good") {
+        this.goodChime();
+        this.correctAnswers++;
+      } else if (answer === "bad") {
+        this.badChime();
+      } else if (answer === "badBad") {
+        this.badBadChime();
+      } else {
         return;
+      }
+
+      this.totalAnswers++;
+
+      const correctAnswersLabel = document.getElementById('correctAnswersLabel');
+      const totalAnswersLabel = document.getElementById('totalAnswersLabel');
+      correctAnswersLabel.innerHTML = this.correctAnswers;
+      totalAnswersLabel.innerHTML = this.totalAnswers;
+
+      setTimeout(() => {
+        this.generateNewTriangle();
+      }, 1000);
+
+      /*
 
       this.triangle.handleMouseClick(mouseX, mouseY);
 
@@ -152,6 +175,7 @@ class TriangleApp {
       setTimeout(() => {
         this.generateNewTriangle();
       }, 1000);
+    */
     }
   }
 
@@ -164,6 +188,7 @@ class TriangleApp {
   }
 
   badBadChime() {
+    this.playChime(660, 880, 990);
     this.playChime(990, 880, 880, 880, 880, 880, 880);
   }
 

@@ -40,7 +40,6 @@ class Edge {
     const centerSide = Math.sign((this.center.x - this.start.x) * (this.end.y - this.start.y) - (this.center.y - this.start.y) * (this.end.x - this.start.x));
 
     this.labelPoint = { x: midpoint.x + r * centerSide * normalPerpendicular.x, y: midpoint.y + r * centerSide * normalPerpendicular.y };
-
   }
 
   draw(ctx) {
@@ -59,11 +58,13 @@ class Edge {
       ctx.setLineDash([]); // Reset to solid line
     }
 
-    ctx.fillStyle = 'black';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(this.label, this.labelPoint.x, this.labelPoint.y);
+    if (this.label) {
+      ctx.fillStyle = 'black';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this.label, this.labelPoint.x, this.labelPoint.y);
+    }
   }
 
   updateFlicker() {
