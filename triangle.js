@@ -3,13 +3,14 @@ class Triangle {
   //////////////////////////////////////////////////////////////////////////////
   constructor() {
 
-    const { question, edgeLabels, hasOtherEdges, angleLabel, text } = generateQuestion();
+    const { angleA, question, edgeLabels, hasOtherEdges, angleLabel, text, textAnswer } = generateQuestion();
+    this.angleA = angleA;
     this.question = question;
     this.edgeLabels = edgeLabels;
     this.hasOtherEdges = hasOtherEdges;
     this.angleLabel = angleLabel;
     this.questionText = text;
-
+    this.textAnswer = textAnswer;
     //rotation = 25 * Math.PI / 180;
     this.rotation = Math.random() * 2 * Math.PI;
 
@@ -30,9 +31,6 @@ class Triangle {
 
     this.centerX = maxOffset + Math.random() * (canvasWidth - 2 * maxOffset);
     this.centerY = maxOffset + Math.random() * (canvasHeight - 2 * maxOffset);
-
-
-    this.angleA = (10 + Math.random() * 70) * Math.PI / 180;
 
 
     // Color assignments - ensure no repetition
@@ -88,14 +86,16 @@ class Triangle {
 
     this.edges = [
       new Edge('adjacent', points[0], points[1], this.edgeLabels.adjacent, this.colors.adjacent, realCenter),
-      new Edge('opposite', points[0], points[2], this.edgeLabels.opposite, this.colors.opposite, realCenter),
-      new Edge('hypotenuse', points[1], points[2], this.edgeLabels.hypotenuse, this.colors.hypotenuse, realCenter),
+      new Edge('opposite', points[0], points[2], this.edgeLabels.opposite, this.colors.opposite, realCenter)
     ];
 
     if (this.hasOtherEdges) {
       this.edges.push(new Edge('adjacent2', points[3], points[2], this.edgeLabels.adjacent2, this.colors.adjacent2, realCenter));
       this.edges.push(new Edge('opposite2', points[3], points[1], this.edgeLabels.opposite2, this.colors.opposite2, realCenter));
     }
+
+    // add at the end to it's on top of everything else in Z-order:
+    this.edges.push(new Edge('hypotenuse', points[2], points[1], this.edgeLabels.hypotenuse, this.colors.hypotenuse, realCenter, this.hasOtherEdges));
 
     this.angleArc = new AngleArc(points[1], this.rotation, this.angleA, this.angleLabel);
     this.angleBracket = new AngleBracket(points[0], this.rotation);
@@ -105,6 +105,9 @@ class Triangle {
   // Check if mouse is near any edge
   checkMouseProximity(mouseX, mouseY) {
     if (this.answer)
+      return;
+
+    if (this.question.type === 'specific-numbers')
       return;
 
     for (const edge of this.edges)
@@ -131,6 +134,12 @@ class Triangle {
     if (this.answer)
       return;
 
+    if (this.question.type !== 'simple' && this.question.type !== 'specific-numbers') {
+      console.log(`Exepcted "simple" question type here, but got ${this.question.type} `);
+      this.answer = "error";
+      return "badBad";
+    }
+
     let selectedCount = 0;
     let selectedEdge = null;
     for (const edge of this.edges) {
@@ -148,7 +157,8 @@ class Triangle {
     this.answer = selectedEdge.name;
 
     if (this.answer === 'hypotenuse') {
-      return "badBad";
+      this.answerType = "badBad";
+      return;
     }
 
     const adjacentName = this.hasOtherEdges ? 'adjacent2' : 'adjacent';
@@ -159,8 +169,34 @@ class Triangle {
         (this.question.func === 'sin' && this.answer === oppositeName) ||
         (this.question.func === 'cos' && this.answer === adjacentName);
 
-      return isCorrect ? "good" : "bad";
+      this.answerType = isCorrect ? "good" : "bad";
+
     }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  tryTextAnswer(answer) {
+    if (this.question.type !== 'specific-numbers') {
+      console.log(`Exepcted "specific-numbers" question type here, but got ${this.question.type} `);
+      this.answer = "error";
+      this.answerType = "badBad";
+      return;
+    }
+
+    this.answer = answer;
+
+    function cleanAnswer(answer) {
+      return answer
+        .replaceAll(' ', '')
+        .replaceAll('(', '')
+        .replaceAll(')', '')
+        .replaceAll(DEGREES_SYMBOL, '');
+    }
+
+    if (cleanAnswer(answer) === cleanAnswer(this.textAnswer))
+      this.answerType = "good";
+    else
+      this.answerType = "bad";
   }
 }
 

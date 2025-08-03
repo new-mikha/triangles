@@ -1,6 +1,9 @@
 
 // Main application class for future enhancements
 class TriangleApp {
+  triangles = [];
+  current = 0;
+
   constructor() {
     this.canvas = document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');
@@ -27,26 +30,49 @@ class TriangleApp {
 
     // Global keyboard event listener for Enter and Space keys
     document.addEventListener('keydown', (event) => {
+      if (document.activeElement.id === 'answerInput') {
+        return;
+      }
+
       if (event.key === 'Enter' || event.key === ' ') {
         this.generateNewTriangle();
+        event.preventDefault();
       }
 
       if (event.key === 'ArrowLeft') {
         this.goBack();
+        event.preventDefault();
       }
 
       if (event.key === 'ArrowRight') {
         this.goNext();
+        event.preventDefault();
       }
 
       if (event.key === 'ArrowUp') {
         this.triangle.rotate(-Math.PI / 20);
+        event.preventDefault();
       }
 
       if (event.key === 'ArrowDown') {
         this.triangle.rotate(Math.PI / 20);
+        event.preventDefault();
       }
 
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', (event) => {
+      event.preventDefault();
+
+      // if (this.triangle.answer) {
+      //   // The form is hidden, but still actilve. Okay, just do same as the 
+      //   // Enter key does above:
+      //   this.generateNewTriangle();
+      //   return;
+      // }
+
+      const answer = document.getElementById('answerInput').value;
+      this.handleTextAnswer(answer);
     });
 
     // Mouse event listeners for hover detection
@@ -71,10 +97,48 @@ class TriangleApp {
     countLabel.innerHTML = this.triangles.length;
 
     const questionText = document.getElementById('questionText');
-    const questionType = this.triangle.questionType;
-    const angleLabel = this.triangle.angleLabel;
 
     questionText.innerHTML = this.triangle.questionText;
+
+    if (this.triangle.question.type === 'specific-numbers') {
+      document.querySelector('.answer-overlay').style.display = 'block';
+
+      if (!this.triangle.answer) {
+        document.getElementById('answerInputContainer').removeAttribute('style')
+        document.getElementById('answerResultContainer').style.display = 'none';
+        document.getElementById('answerInput').value = '';
+      } else {
+        document.getElementById('answerInputContainer').style.display = 'none';
+        document.getElementById('answerResultContainer').removeAttribute('style');
+
+        document.getElementById('answerText').innerHTML = this.triangle.answer;
+
+        const answerTypeElement = document.getElementById('answerType');
+        const answerType = this.triangle.answerType;
+        let displayResult = '';
+        if (answerType === "good") {
+          displayResult = '<span class="correct">✓</span> Correct</span>';
+          document.getElementById('correctAnswer').style.display = 'none';
+        } else if (answerType === "bad") {
+          displayResult = '<span class="incorrect">✗</span> Incorrect</span>';
+          document.getElementById('correctAnswer').removeAttribute('style');
+          document.getElementById('correctAnswer').innerHTML = "Correct answer: " + this.triangle.textAnswer;
+        } else if (answerType === "badBad") {
+          displayResult = '<span class="incorrect">✗✗</span> Very Incorrect</span>';
+          document.getElementById('correctAnswer').removeAttribute('style');
+          document.getElementById('correctAnswer').innerHTML = "Correct answer: " + this.triangle.textAnswer;
+        } else {
+          displayResult = 'InternalError';
+        }
+
+        answerTypeElement.innerHTML = displayResult;
+      }
+
+      document.getElementById('answerInput').focus();
+    }
+    else {
+      document.querySelector('.answer-overlay').style.display = 'none';
+    }
   }
 
   handleMouseMove(event) {
@@ -99,99 +163,79 @@ class TriangleApp {
   totalAnswers = 0;
 
   handleMouseClick(event) {
-    if (this.triangle && !this.triangle.answer) {
-      const rect = this.canvas.getBoundingClientRect();
-      const scaleX = this.canvas.width / rect.width;
-      const scaleY = this.canvas.height / rect.height;
+    if (!this.triangle || this.triangle.answer)
+      return;
 
-      const mouseX = (event.clientX - rect.left) * scaleX;
-      const mouseY = (event.clientY - rect.top) * scaleY;
+    const rect = this.canvas.getBoundingClientRect();
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
 
-      const answer = this.triangle.tryAnswer(mouseX, mouseY);
+    const mouseX = (event.clientX - rect.left) * scaleX;
+    const mouseY = (event.clientY - rect.top) * scaleY;
 
-      if (answer === "good") {
-        this.goodChime();
-        this.correctAnswers++;
-      } else if (answer === "bad") {
-        this.badChime();
-      } else if (answer === "badBad") {
-        this.badBadChime();
-      } else {
-        return;
-      }
+    this.triangle.tryAnswer(mouseX, mouseY);
 
-      this.totalAnswers++;
+    this.respondToAnswer();
+  }
 
-      const correctAnswersLabel = document.getElementById('correctAnswersLabel');
-      const totalAnswersLabel = document.getElementById('totalAnswersLabel');
-      correctAnswersLabel.innerHTML = this.correctAnswers;
-      totalAnswersLabel.innerHTML = this.totalAnswers;
+  /////////////////////////////////////////////////////////////////////////////
+  handleTextAnswer(answer) {
+    if (!this.triangle || this.triangle.answer)
+      return;
 
+    this.triangle.tryTextAnswer(answer);
+
+    this.respondToAnswer();
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  respondToAnswer() {
+    const answerType = this.triangle.answerType;
+
+    if (answerType === "good") {
+      this.goodChime();
+      this.correctAnswers++;
+    } else if (answerType === "bad") {
+      this.badChime();
+    } else if (answerType === "badBad") {
+      this.badBadChime();
+    } else {
+      return;
+    }
+
+    this.totalAnswers++;
+
+    const correctAnswersLabel = document.getElementById('correctAnswersLabel');
+    const totalAnswersLabel = document.getElementById('totalAnswersLabel');
+    correctAnswersLabel.innerHTML = this.correctAnswers;
+    totalAnswersLabel.innerHTML = this.totalAnswers;
+
+    if (this.triangle.question.type === 'specific-numbers') {
+      this.updateQuestion();
+    } else {
       setTimeout(() => {
         this.generateNewTriangle();
       }, 1000);
-
-      /*
-
-      this.triangle.handleMouseClick(mouseX, mouseY);
-
-      if(!this.triangle.answer)
-        return;
-
-      this.totalAnswers++;
-
-      if (this.triangle.answer === 'hypotenuse') {
-        this.goodChime();
-        this.badBadChime();
-      } else if (!this.triangle.hasOtherEdges) {
-        const isCorrect = //
-          (this.triangle.questionType === 'sin' && this.triangle.answer === 'opposite') ||
-          (this.triangle.questionType === 'cos' && this.triangle.answer === 'adjacent');
-
-        if (isCorrect) {
-          this.correctAnswers++;
-          this.goodChime();
-        } else {
-          this.badChime();
-        }
-      } else {
-        const isCorrect =
-          (this.triangle.questionType === 'sin' && this.triangle.answer === 'opposite2') ||
-          (this.triangle.questionType === 'cos' && this.triangle.answer === 'adjacent2');
-
-        if (isCorrect) {
-          this.goodChime();
-          this.correctAnswers++;
-        } else {
-          this.badChime();
-        }
-      }
-
-      const correctAnswersLabel = document.getElementById('correctAnswersLabel');
-      const totalAnswersLabel = document.getElementById('totalAnswersLabel');
-      correctAnswersLabel.innerHTML = this.correctAnswers;
-      totalAnswersLabel.innerHTML = this.totalAnswers;
-
-      setTimeout(() => {
-        this.generateNewTriangle();
-      }, 1000);
-    */
     }
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   goodChime() {
     this.playChime(660, 880, 990);
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   badChime() {
     this.playChime(400, 580);
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   badBadChime() {
     this.playChime(660, 880, 990);
     this.playChime(990, 880, 880, 880, 880, 880, 880);
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   playChime(...frequencies) {
     let a = new AudioContext(), o = a.createOscillator(), g = a.createGain();
     o.connect(g); g.connect(a.destination);
@@ -204,11 +248,7 @@ class TriangleApp {
     o.stop(t + frequencies.length * 0.1);
   }
 
-  triangles = [];
-  current = 0;
-
-
-
+  /////////////////////////////////////////////////////////////////////////////
   goBack() {
     if (this.current > 0) {
       this.current--;
@@ -217,6 +257,7 @@ class TriangleApp {
     }
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   goNext() {
     if (this.current < this.triangles.length - 1) {
       this.current++;
@@ -225,6 +266,7 @@ class TriangleApp {
     }
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   startAnimation() {
     const animate = () => {
       this.draw();
@@ -233,6 +275,7 @@ class TriangleApp {
     animate();
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   draw() {
     // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

@@ -28,6 +28,30 @@
           Which leg corresponds to <span class="bold-text">sin θ</span>?
         </div>
       </div>
+
+      <div class="answer-overlay" style="display: none;">
+
+        <div id="answerInputContainer" class="answer-container">
+          <form>
+            <label for="answerInput" class="answer-label">Answer:</label>
+            <input type="text" id="answerInput" class="answer-input">
+            <button type="submit" id="submitBtn">Submit</button>
+          </form>
+        </div>
+
+        <div id="answerResultContainer">
+          <div class="answer-container">
+            <label class="answer-label">Your answer:</label>
+            <span id="answerText">Hi there</span>
+            -
+            <span id="answerType">Correct</span>
+          </div>
+          <div id="correctAnswer" class="answer-container">
+            Hi there
+          </div>
+        </div>
+
+      </div>
       <canvas id="canvas"></canvas>
     </div>
   </div>

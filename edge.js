@@ -20,7 +20,7 @@ function isPointWithinSegment(p, a, b) {
 }
 
 class Edge {
-  constructor(name, start, end, label, color, triangleCenter) {
+  constructor(name, start, end, label, color, triangleCenter, moveLabelToEnd) {
     this.name = name;
     this.start = start;
     this.end = end;
@@ -32,8 +32,15 @@ class Edge {
     this.isFlickering = false;
     this.lastFlickerTime = 0;
 
-    const r = 10;
-    const midpoint = { x: (this.start.x + this.end.x) / 2, y: (this.start.y + this.end.y) / 2 };
+    const r = moveLabelToEnd ? 25 : 25;
+
+    const startWeight = 1;
+    const endWeight = moveLabelToEnd ? 0.6 : 1;
+
+    const midpoint = { 
+      x: (this.start.x * startWeight + this.end.x * endWeight) / (startWeight + endWeight), 
+      y: (this.start.y * startWeight + this.end.y * endWeight) / (startWeight + endWeight) 
+    };
     const segmentVector = { x: this.end.x - this.start.x, y: this.end.y - this.start.y };
     const length = Math.hypot(segmentVector.x, segmentVector.y);
     const normalPerpendicular = { x: -segmentVector.y / length, y: segmentVector.x / length };
@@ -59,12 +66,115 @@ class Edge {
     }
 
     if (this.label) {
-      ctx.fillStyle = 'black';
-      ctx.font = '16px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(this.label, this.labelPoint.x, this.labelPoint.y);
+      this.htmlFillText(ctx, this.label, this.labelPoint.x, this.labelPoint.y);
     }
+  }
+
+  htmlFillText(ctx, text, x, y) {
+    // Parse the text for <b> and <i> tags
+    const segments = this.parseFormattedText(text);
+
+    let currentX = x;
+    const baseFont = '16px Arial';
+
+    // Calculate total width to center the entire text
+    let totalWidth = 0;
+    for (const segment of segments) {
+      const font = this.getFontForSegment(segment, baseFont);
+      ctx.font = font;
+      totalWidth += ctx.measureText(segment.text).width;
+    }
+
+    // Adjust starting position to center the entire text
+    currentX = x - totalWidth / 2;
+
+    // Render each segment
+    for (const segment of segments) {
+      const font = this.getFontForSegment(segment, baseFont);
+      ctx.font = font;
+      ctx.fillStyle = 'black';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(segment.text, currentX, y);
+      currentX += ctx.measureText(segment.text).width;
+    }
+  }
+
+  parseFormattedText(text) {
+    const segments = [];
+    let currentIndex = 0;
+    let currentText = '';
+    let currentTags = [];
+
+    while (currentIndex < text.length) {
+      const char = text[currentIndex];
+
+      if (char === '<') {
+        // Save current text if any
+        if (currentText.length > 0) {
+          segments.push({
+            text: currentText,
+            bold: currentTags.includes('b'),
+            italic: currentTags.includes('i')
+          });
+          currentText = '';
+        }
+
+        // Find the end of the tag
+        const tagEnd = text.indexOf('>', currentIndex);
+        if (tagEnd === -1) {
+          // Malformed tag, treat as regular text
+          currentText += char;
+          currentIndex++;
+          continue;
+        }
+
+        const tag = text.substring(currentIndex + 1, tagEnd);
+        currentIndex = tagEnd + 1;
+
+        if (tag.startsWith('/')) {
+          // Closing tag
+          const tagName = tag.substring(1);
+          const tagIndex = currentTags.indexOf(tagName);
+          if (tagIndex !== -1) {
+            currentTags.splice(tagIndex, 1);
+          }
+        } else {
+          // Opening tag
+          if (tag === 'b' || tag === 'i') {
+            currentTags.push(tag);
+          }
+        }
+      } else {
+        currentText += char;
+        currentIndex++;
+      }
+    }
+
+    // Add any remaining text
+    if (currentText.length > 0) {
+      segments.push({
+        text: currentText,
+        bold: currentTags.includes('b'),
+        italic: currentTags.includes('i')
+      });
+    }
+
+    return segments;
+  }
+
+  getFontForSegment(segment, baseFont) {
+    let font = baseFont;
+
+    if (segment.bold && segment.italic) {
+      font = 'bold italic 16px Arial';
+    } else if (segment.bold) {
+      font = 'bold 16px Arial';
+    } else if (segment.italic) {
+      font = 'italic 16px Arial';
+    }
+
+    return font;
   }
 
   updateFlicker() {
