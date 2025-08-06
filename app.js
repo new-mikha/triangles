@@ -104,34 +104,34 @@ class TriangleApp {
       document.querySelector('.answer-overlay').style.display = 'block';
 
       if (!this.triangle.answer) {
-        document.getElementById('answerInputContainer').removeAttribute('style')
-        document.getElementById('answerResultContainer').style.display = 'none';
+        show('answerInputContainer');
+        hide('answerResultContainer');
         document.getElementById('answerInput').value = '';
       } else {
-        document.getElementById('answerInputContainer').style.display = 'none';
-        document.getElementById('answerResultContainer').removeAttribute('style');
+        hide('answerInputContainer');
+        show('answerResultContainer');
 
         document.getElementById('answerText').innerHTML = this.triangle.answer;
 
-        const answerTypeElement = document.getElementById('answerType');
+        const answerTypeSpan = document.getElementById('answerType');
         const answerType = this.triangle.answerType;
         let displayResult = '';
         if (answerType === "good") {
           displayResult = '<span class="correct">✓</span> Correct</span>';
-          document.getElementById('correctAnswer').style.display = 'none';
+          hide('correctAnswer');
         } else if (answerType === "bad") {
           displayResult = '<span class="incorrect">✗</span> Incorrect</span>';
-          document.getElementById('correctAnswer').removeAttribute('style');
+          show('correctAnswer');
           document.getElementById('correctAnswer').innerHTML = "Correct answer: " + this.triangle.textAnswer;
         } else if (answerType === "badBad") {
           displayResult = '<span class="incorrect">✗✗</span> Very Incorrect</span>';
-          document.getElementById('correctAnswer').removeAttribute('style');
+          show('correctAnswer');
           document.getElementById('correctAnswer').innerHTML = "Correct answer: " + this.triangle.textAnswer;
         } else {
           displayResult = 'InternalError';
         }
 
-        answerTypeElement.innerHTML = displayResult;
+        answerTypeSpan.innerHTML = displayResult;
       }
 
       document.getElementById('answerInput').focus();
@@ -163,7 +163,7 @@ class TriangleApp {
   totalAnswers = 0;
 
   handleMouseClick(event) {
-    if (!this.triangle || this.triangle.answer)
+    if (!this.triangle || this.triangle.answer || this.triangle.question.type !== 'simple')
       return;
 
     const rect = this.canvas.getBoundingClientRect();
@@ -180,8 +180,12 @@ class TriangleApp {
 
   /////////////////////////////////////////////////////////////////////////////
   handleTextAnswer(answer) {
-    if (!this.triangle || this.triangle.answer)
+    if (!this.triangle || this.triangle.answer ||
+      this.triangle.question.type !== 'specific-numbers' ||
+      !answer || answer.trim() === '')  //
+    {
       return;
+    }
 
     this.triangle.tryTextAnswer(answer);
 

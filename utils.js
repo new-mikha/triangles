@@ -8,3 +8,11 @@ function radToDeg(rad) {
 }
 
 const DEGREES_SYMBOL = '°';
+
+function hide(elementId) {
+  document.getElementById(elementId).style.display = 'none';
+}
+
+function show(elementId) {
+  document.getElementById(elementId).removeAttribute('style');
+}
