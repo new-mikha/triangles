@@ -30,6 +30,16 @@ class TriangleApp {
 
     // Global keyboard event listener for Enter and Space keys
     document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowUp') {
+        this.triangle.rotate(-Math.PI / 20);
+        event.preventDefault();
+      }
+
+      if (event.key === 'ArrowDown') {
+        this.triangle.rotate(Math.PI / 20);
+        event.preventDefault();
+      }
+      
       if (document.activeElement.id === 'answerInput') {
         return;
       }
@@ -48,17 +58,6 @@ class TriangleApp {
         this.goNext();
         event.preventDefault();
       }
-
-      if (event.key === 'ArrowUp') {
-        this.triangle.rotate(-Math.PI / 20);
-        event.preventDefault();
-      }
-
-      if (event.key === 'ArrowDown') {
-        this.triangle.rotate(Math.PI / 20);
-        event.preventDefault();
-      }
-
     });
 
     document.getElementById('submitBtn').addEventListener('click', (event) => {
