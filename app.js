@@ -1,4 +1,3 @@
-
 // Main application class for future enhancements
 class TriangleApp {
   triangles = [];
@@ -39,7 +38,7 @@ class TriangleApp {
         this.triangle.rotate(Math.PI / 20);
         event.preventDefault();
       }
-      
+
       if (document.activeElement.id === 'answerInput') {
         return;
       }
@@ -82,6 +81,11 @@ class TriangleApp {
 
 
   generateNewTriangle() {
+    if (this.changeTimer) 
+      clearTimeout(this.changeTimer);
+    this.changeTimer = null;
+
+
     this.triangle = new Triangle();
     this.triangles.push(this.triangle);
     this.current = this.triangles.length - 1;
@@ -162,7 +166,11 @@ class TriangleApp {
   totalAnswers = 0;
 
   handleMouseClick(event) {
-    if (!this.triangle || this.triangle.answer || this.triangle.question.type !== 'simple')
+    const isClickableQuestionType =
+      this.triangle.question.type === 'simple' ||
+      this.triangle.question.type === 'reversed-simple';
+
+    if (!this.triangle || this.triangle.answer || !isClickableQuestionType)
       return;
 
     const rect = this.canvas.getBoundingClientRect();
@@ -216,8 +224,13 @@ class TriangleApp {
     if (this.triangle.question.type === 'specific-numbers') {
       this.updateQuestion();
     } else {
-      setTimeout(() => {
+      if (this.changeTimer) 
+        clearTimeout(this.changeTimer);
+      
+      this.changeTimer = setTimeout(() => {
+        this.changeTimer = null;
         this.generateNewTriangle();
+        this.scheduledChangeTime = null;
       }, 1000);
     }
   }

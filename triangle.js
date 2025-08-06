@@ -134,8 +134,13 @@ class Triangle {
     if (this.answer)
       return;
 
-    if (this.question.type !== 'simple' && this.question.type !== 'specific-numbers') {
-      console.log(`Exepcted "simple" question type here, but got ${this.question.type} `);
+    const isClickableQuestionType =
+      this.question.type === 'simple' ||
+      this.question.type === 'reversed-simple';
+
+
+    if (!isClickableQuestionType) {
+      console.log(`Exepcted "simple" or "reversed-simple" question type here, but got ${this.question.type} `);
       this.answer = "error";
       return "badBad";
     }
@@ -157,21 +162,28 @@ class Triangle {
     this.answer = selectedEdge.name;
 
     if (this.answer === 'hypotenuse') {
-      this.answerType = "badBad";
+      if (this.question.type === 'simple') {
+        this.answerType = "badBad";
+      } else {
+        this.answerType = "good";
+      }
+      return;
+    }
+
+    if (this.question.type === 'reversed-simple') {
+      this.answerType = "bad";
       return;
     }
 
     const adjacentName = this.hasOtherEdges ? 'adjacent2' : 'adjacent';
     const oppositeName = this.hasOtherEdges ? 'opposite2' : 'opposite';
 
-    if (this.question.type === 'simple') {
-      const isCorrect =
-        (this.question.func === 'sin' && this.answer === oppositeName) ||
-        (this.question.func === 'cos' && this.answer === adjacentName);
+    const isCorrect =
+      (this.question.func === 'sin' && this.answer === oppositeName) ||
+      (this.question.func === 'cos' && this.answer === adjacentName);
 
-      this.answerType = isCorrect ? "good" : "bad";
+    this.answerType = isCorrect ? "good" : "bad";
 
-    }
   }
 
   //////////////////////////////////////////////////////////////////////////////
