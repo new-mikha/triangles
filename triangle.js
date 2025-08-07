@@ -22,16 +22,21 @@ class Triangle {
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
 
+    console.log(`canvas.width: ${canvas.width}, canvas.height: ${canvas.height}`);
+
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
-    const margin = Math.min(100, Math.min(canvasWidth, canvasHeight) * 0.1);
-
-    const maxOffset = this.size + margin;
-
-    this.centerX = maxOffset + Math.random() * (canvasWidth - 2 * maxOffset);
-    this.centerY = maxOffset + Math.random() * (canvasHeight - 2 * maxOffset);
-
+    if (Math.min(canvasWidth, canvasHeight) < 500) {
+      this.centerX = canvasWidth / 2;
+      this.centerY = canvasHeight / 2;
+    }
+    else {
+      const margin = Math.min(100, Math.min(canvasWidth, canvasHeight) * 0.1);
+      const maxOffset = this.size + margin;
+      this.centerX = maxOffset + Math.random() * (canvasWidth - 2 * maxOffset);
+      this.centerY = maxOffset + Math.random() * (canvasHeight - 2 * maxOffset);
+    }
 
     // Color assignments - ensure no repetition
     const colorsArray = ['red', 'green', 'blue'];
@@ -68,9 +73,19 @@ class Triangle {
       { x: 0, y: opposite }  // Opposite leg end
     ];
 
+    const cg = { x: basePoints[0].x + basePoints[1].x + basePoints[2].x, y: basePoints[0].y + basePoints[1].y + basePoints[2].y };
+
     if (this.hasOtherEdges) {
       basePoints.push({ x: adjacent, y: opposite });
+
+      cg.x += basePoints[3].x;
+      cg.y += basePoints[3].y;
     }
+
+    cg.x /= basePoints.length;
+    cg.y /= basePoints.length;
+
+    basePoints.forEach(point => { point.x -= cg.x; point.y -= cg.y; });
 
     // Apply rotation and translation
     const points = basePoints.map(point => {
