@@ -61,14 +61,6 @@ class TriangleApp {
 
     document.getElementById('submitBtn').addEventListener('click', (event) => {
       event.preventDefault();
-
-      // if (this.triangle.answer) {
-      //   // The form is hidden, but still actilve. Okay, just do same as the 
-      //   // Enter key does above:
-      //   this.generateNewTriangle();
-      //   return;
-      // }
-
       const answer = document.getElementById('answerInput').value;
       this.handleTextAnswer(answer);
     });
@@ -81,7 +73,7 @@ class TriangleApp {
 
 
   generateNewTriangle() {
-    if (this.changeTimer) 
+    if (this.changeTimer)
       clearTimeout(this.changeTimer);
     this.changeTimer = null;
 
@@ -103,7 +95,30 @@ class TriangleApp {
 
     questionText.innerHTML = this.triangle.questionText;
 
-    if (this.triangle.question.type === 'specific-numbers') {
+    const answerType = this.triangle.answerType;
+    let displayResult = '';
+
+    if (this.triangle.question.type !== 'specific-numbers') {
+      if (!this.triangle.answer) {
+        document.querySelector('.answer-overlay').style.display = 'none';
+      } else {
+        document.querySelector('.answer-overlay').removeAttribute('style');
+        hide('answerTextContainer');
+        hide('answerInputContainer');
+        hide('correctAnswer');
+
+        if (answerType === "good") {
+          displayResult = '<span class="correct">✓</span> Correct</span>';
+        } else if (answerType === "bad") {
+          displayResult = '<span class="incorrect">✗</span> Incorrect</span>';
+        } else if (answerType === "badBad") {
+          displayResult = '<span class="incorrect">✗✗</span> Very Incorrect</span>';
+        } else {
+          displayResult = 'InternalError';
+        }
+      }
+
+    } else {
       document.querySelector('.answer-overlay').style.display = 'block';
 
       if (!this.triangle.answer) {
@@ -113,12 +128,10 @@ class TriangleApp {
       } else {
         hide('answerInputContainer');
         show('answerResultContainer');
+        show('answerTextContainer');
 
         document.getElementById('answerText').innerHTML = this.triangle.answer;
 
-        const answerTypeSpan = document.getElementById('answerType');
-        const answerType = this.triangle.answerType;
-        let displayResult = '';
         if (answerType === "good") {
           displayResult = '<span class="correct">✓</span> Correct</span>';
           hide('correctAnswer');
@@ -134,14 +147,12 @@ class TriangleApp {
           displayResult = 'InternalError';
         }
 
-        answerTypeSpan.innerHTML = displayResult;
       }
 
       document.getElementById('answerInput').focus();
     }
-    else {
-      document.querySelector('.answer-overlay').style.display = 'none';
-    }
+
+    document.getElementById('answerType').innerHTML = displayResult;
   }
 
   handleMouseMove(event) {
@@ -221,12 +232,13 @@ class TriangleApp {
     correctAnswersLabel.innerHTML = this.correctAnswers;
     totalAnswersLabel.innerHTML = this.totalAnswers;
 
-    if (this.triangle.question.type === 'specific-numbers') {
-      this.updateQuestion();
-    } else {
-      if (this.changeTimer) 
+    this.updateQuestion();
+
+
+    if (answerType === "good") {
+      if (this.changeTimer)
         clearTimeout(this.changeTimer);
-      
+
       this.changeTimer = setTimeout(() => {
         this.changeTimer = null;
         this.generateNewTriangle();

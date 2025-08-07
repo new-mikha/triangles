@@ -156,3 +156,6 @@ button:active {
   color: red;
 }
 
+.answer-text {
+  display: inline-block;
+}
