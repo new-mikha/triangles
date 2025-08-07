@@ -208,6 +208,41 @@ button:active {
   z-index: 10;
   max-width: 90vw;
   width: auto;
+  min-width: 300px;
+}
+
+#answerResultContainer {
+  width: 100%;
+  min-width: 0;
+}
+
+#answerResultContainer .answer-container {
+  width: 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+}
+
+#answerTextContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+#correctAnswer {
+  width: 100%;
+  text-align: center;
+  margin-top: 8px;
+}
+
+#answerType {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
@@ -215,6 +250,16 @@ button:active {
     bottom: 10px;
     padding: 12px 20px;
     max-width: 95vw;
+    min-width: 280px;
+  }
+  
+  #answerResultContainer .answer-container {
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  
+  #answerTextContainer {
+    gap: 6px;
   }
 }
 
@@ -223,6 +268,20 @@ button:active {
     bottom: 5px;
     padding: 10px 15px;
     max-width: 98vw;
+    min-width: 250px;
+  }
+  
+  #answerResultContainer .answer-container {
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+  
+  #answerTextContainer {
+    gap: 4px;
+  }
+  
+  #correctAnswer {
+    margin-top: 6px;
   }
 }
 
