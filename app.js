@@ -100,9 +100,10 @@ class TriangleApp {
 
     if (this.triangle.question.type !== 'specific-numbers') {
       if (!this.triangle.answer) {
-        document.querySelector('.answer-overlay').style.display = 'none';
+        hide('answerOverlay');
       } else {
-        document.querySelector('.answer-overlay').removeAttribute('style');
+        show('answerOverlay');
+        show('answerResultContainer');
         hide('answerTextContainer');
         hide('answerInputContainer');
         hide('correctAnswer');
@@ -119,7 +120,7 @@ class TriangleApp {
       }
 
     } else {
-      document.querySelector('.answer-overlay').style.display = 'block';
+      show('answerOverlay');
 
       if (!this.triangle.answer) {
         show('answerInputContainer');
