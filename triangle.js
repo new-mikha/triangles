@@ -22,8 +22,6 @@ class Triangle {
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
 
-    console.log(`canvas.width: ${canvas.width}, canvas.height: ${canvas.height}`);
-
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
