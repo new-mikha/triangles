@@ -34,15 +34,17 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
+  overflow-x: auto;
 }
 
 .left-controls {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .right-controls {
@@ -50,18 +52,22 @@ body {
   align-items: center;
   gap: 10px;
   padding-right: 0;
+  flex-shrink: 0;
 }
 
 /* Mobile responsive for button area */
 @media (max-width: 768px) {
   .button-area {
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px;
   }
   
   .left-controls, .right-controls {
-    justify-content: center;
-    width: 100%;
+    justify-content: flex-start;
+    width: auto;
+    flex-shrink: 0;
   }
   
   .right-controls {
@@ -73,10 +79,12 @@ body {
   .button-area {
     padding: 8px;
     margin-bottom: 15px;
+    overflow-x: auto;
   }
   
   .left-controls, .right-controls {
     gap: 8px;
+    flex-shrink: 0;
   }
 }
 
