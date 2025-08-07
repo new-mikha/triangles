@@ -48,9 +48,9 @@ function generateQuestion() {
     const legLabel = edgeLabelsArray[1];
     if (func === 'sin') {
       if (hasOtherEdges)
-        edgeLabels.opposite2 = legLabel ;
+        edgeLabels.opposite2 = legLabel;
       else
-      edgeLabels.opposite = legLabel;
+        edgeLabels.opposite = legLabel;
     } else {
       if (hasOtherEdges)
         edgeLabels.adjacent2 = legLabel;

@@ -190,15 +190,16 @@ class Triangle {
       return;
     }
 
-    const adjacentName = this.hasOtherEdges ? 'adjacent2' : 'adjacent';
-    const oppositeName = this.hasOtherEdges ? 'opposite2' : 'opposite';
 
-    const isCorrect =
-      (this.question.func === 'sin' && this.answer === oppositeName) ||
-      (this.question.func === 'cos' && this.answer === adjacentName);
+    const isOpposite = this.answer === 'opposite' || this.answer === 'opposite2';
+    const isAdjacent = this.answer === 'adjacent' || this.answer === 'adjacent2';
 
-    this.answerType = isCorrect ? "good" : "bad";
-
+    if (this.question.func == 'sin' && isOpposite)
+      this.answerType = "good";
+    else if (this.question.func == 'cos' && isAdjacent)
+      this.answerType = "good";
+    else
+      this.answerType = "bad";
   }
 
   //////////////////////////////////////////////////////////////////////////////
