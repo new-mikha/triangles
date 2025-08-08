@@ -1,10 +1,11 @@
 class AngleArc {
-  constructor(points, iPoint, rotation, angleA, label) {
+  constructor(points, iPoint, rotation, angleA, label, mirrorFactor) {
     this.points = points;
     this.iPoint = iPoint;
     this.rotation = rotation;
     this.angleA = angleA;
     this.label = label;
+    this.mirrorFactor = mirrorFactor;
   }
 
   center() {
@@ -19,8 +20,15 @@ class AngleArc {
     const arcRadius = (this.angleA > Math.PI / 2 * 0.7) ? 20 : 40;
 
     // Draw arc at the angle between hypotenuse and adjacent leg (point 1)
-    const endAngle = Math.PI + this.rotation;
-    const startAngle = endAngle - this.angleA;
+
+    let startAngle, endAngle;
+    if (this.mirrorFactor > 0) {
+      endAngle = Math.PI + this.rotation;
+      startAngle = endAngle - this.angleA;
+    } else {
+      startAngle = this.rotation;
+      endAngle = startAngle + this.angleA;
+    }
 
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;

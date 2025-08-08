@@ -1,8 +1,9 @@
 class AngleBracket {
-  constructor(points, iPoint, rotation) {
+  constructor(points, iPoint, rotation, mirrorFactor) {
     this.points = points;
     this.iPoint = iPoint;
     this.rotation = rotation;
+    this.mirrorFactor = mirrorFactor;
   }
 
   center() {
@@ -15,7 +16,7 @@ class AngleBracket {
 
   draw(ctx) {
     const size = 15
-    const square = [[size, 0], [size, size], [0, size]];
+    const square = [[this.mirrorFactor * size, 0], [this.mirrorFactor * size, size], [0, size]];
 
     // Rotate square points by this.rotation
     for (let i = 0; i < square.length; i++) {

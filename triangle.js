@@ -13,6 +13,7 @@ class Triangle {
     this.textAnswer = textAnswer;
     //rotation = 25 * Math.PI / 180;
     this.rotation = Math.random() * 2 * Math.PI;
+    this.mirrorFactor = Math.random() < 0.5 ? 1 : -1;
 
     const canvas = document.getElementById('canvas');
 
@@ -71,14 +72,14 @@ class Triangle {
     // Base points before rotation
     const basePoints = [
       { x: 0, y: 0 }, // Right angle
-      { x: adjacent, y: 0 }, // Adjacent leg end
+      { x: this.mirrorFactor * adjacent, y: 0 }, // Adjacent leg end
       { x: 0, y: opposite }  // Opposite leg end
     ];
 
     const cg = { x: basePoints[0].x + basePoints[1].x + basePoints[2].x, y: basePoints[0].y + basePoints[1].y + basePoints[2].y };
 
     if (this.hasOtherEdges) {
-      basePoints.push({ x: adjacent, y: opposite });
+      basePoints.push({ x: this.mirrorFactor * adjacent, y: opposite });
 
       cg.x += basePoints[3].x;
       cg.y += basePoints[3].y;
@@ -127,8 +128,8 @@ class Triangle {
     // add at the end to it's on top of everything else in Z-order:
     this.edges.push(new Edge('hypotenuse', this.points, 2, 1, this.edgeLabels.hypotenuse, this.colors.hypotenuse, realCenter, this.hasOtherEdges));
 
-    this.angleArc = new AngleArc(this.points, 1, this.rotation, this.angleA, this.angleLabel);
-    this.angleBracket = new AngleBracket(this.points, 0, this.rotation);
+    this.angleArc = new AngleArc(this.points, 1, this.rotation, this.angleA, this.angleLabel, this.mirrorFactor);
+    this.angleBracket = new AngleBracket(this.points, 0, this.rotation, this.mirrorFactor);
   }
 
   //////////////////////////////////////////////////////////////////////////////
