@@ -29,14 +29,17 @@ class TriangleApp {
 
     // Global keyboard event listener for Enter and Space keys
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'ArrowUp') {
-        this.triangle.rotate(-Math.PI / 20);
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
         event.preventDefault();
-      }
+        if (!this.triangle.answer) {
+          this.playChime(660, 660, 660);
+          return;
+        }
 
-      if (event.key === 'ArrowDown') {
-        this.triangle.rotate(Math.PI / 20);
-        event.preventDefault();
+        if (event.key === 'ArrowUp')
+          this.triangle.rotate(-Math.PI / 20);
+        else
+          this.triangle.rotate(Math.PI / 20);
       }
 
       if (document.activeElement.id === 'answerInput') {
