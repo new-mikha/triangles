@@ -1,9 +1,18 @@
 class AngleArc {
-  constructor(center, rotation, angleA, label) {
-    this.center = center;
+  constructor(points, iPoint, rotation, angleA, label) {
+    this.points = points;
+    this.iPoint = iPoint;
     this.rotation = rotation;
     this.angleA = angleA;
     this.label = label;
+  }
+
+  center() {
+    return this.points[this.iPoint];
+  }
+
+  rotate(rotation) {
+    this.rotation = rotation;
   }
 
   draw(ctx) {
@@ -16,15 +25,13 @@ class AngleArc {
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(this.center.x, this.center.y, arcRadius, startAngle, endAngle);
+    ctx.arc(this.center().x, this.center().y, arcRadius, startAngle, endAngle);
     ctx.stroke();
-
 
     const labelRadius = arcRadius + 15;
     const labelAngle = (startAngle + endAngle) / 2;
-    const labelX = this.center.x + labelRadius * Math.cos(labelAngle);
-    const labelY = this.center.y + labelRadius * Math.sin(labelAngle);
-
+    const labelX = this.center().x + labelRadius * Math.cos(labelAngle);
+    const labelY = this.center().y + labelRadius * Math.sin(labelAngle);
 
     ctx.fillStyle = 'black';
     ctx.font = '16px Arial';

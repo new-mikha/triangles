@@ -20,10 +20,11 @@ function isPointWithinSegment(p, a, b) {
 }
 
 class Edge {
-  constructor(name, start, end, label, color, triangleCenter, moveLabelToEnd) {
+  constructor(name, points, iStart, iEnd, label, color, triangleCenter, moveLabelToEnd) {
     this.name = name;
-    this.start = start;
-    this.end = end;
+    this.points = points;
+    this.iStart = iStart;
+    this.iEnd = iEnd;
     this.label = label;
     this.color = color;
     this.center = triangleCenter;
@@ -31,22 +32,15 @@ class Edge {
     this.isFullOn = true;
     this.isFlickering = false;
     this.lastFlickerTime = 0;
+    this.moveLabelToEnd = moveLabelToEnd;
+  }
 
-    const r = moveLabelToEnd ? 25 : 25;
+  start() {
+    return this.points[this.iStart];
+  }
 
-    const startWeight = 1;
-    const endWeight = moveLabelToEnd ? 0.6 : 1;
-
-    const midpoint = { 
-      x: (this.start.x * startWeight + this.end.x * endWeight) / (startWeight + endWeight), 
-      y: (this.start.y * startWeight + this.end.y * endWeight) / (startWeight + endWeight) 
-    };
-    const segmentVector = { x: this.end.x - this.start.x, y: this.end.y - this.start.y };
-    const length = Math.hypot(segmentVector.x, segmentVector.y);
-    const normalPerpendicular = { x: -segmentVector.y / length, y: segmentVector.x / length };
-    const centerSide = Math.sign((this.center.x - this.start.x) * (this.end.y - this.start.y) - (this.center.y - this.start.y) * (this.end.x - this.start.x));
-
-    this.labelPoint = { x: midpoint.x + r * centerSide * normalPerpendicular.x, y: midpoint.y + r * centerSide * normalPerpendicular.y };
+  end() {
+    return this.points[this.iEnd];
   }
 
   draw(ctx) {
@@ -59,14 +53,31 @@ class Edge {
       if (this.isAnswer)
         ctx.setLineDash([5, 5]);
       ctx.beginPath();
-      ctx.moveTo(this.start.x, this.start.y);
-      ctx.lineTo(this.end.x, this.end.y);
+      ctx.moveTo(this.start().x, this.start().y);
+      ctx.lineTo(this.end().x, this.end().y);
       ctx.stroke();
       ctx.setLineDash([]); // Reset to solid line
     }
 
     if (this.label) {
-      this.htmlFillText(ctx, this.label, this.labelPoint.x, this.labelPoint.y);
+
+      const r = this.moveLabelToEnd ? 25 : 25;
+
+      const startWeight = 1;
+      const endWeight = this.moveLabelToEnd ? 0.6 : 1;
+
+      const midpoint = { 
+        x: (this.start().x * startWeight + this.end().x * endWeight) / (startWeight + endWeight), 
+        y: (this.start().y * startWeight + this.end().y * endWeight) / (startWeight + endWeight) 
+      };
+      const segmentVector = { x: this.end().x - this.start().x, y: this.end().y - this.start().y };
+      const length = Math.hypot(segmentVector.x, segmentVector.y);
+      const normalPerpendicular = { x: -segmentVector.y / length, y: segmentVector.x / length };
+      const centerSide = Math.sign((this.center.x - this.start().x) * (this.end().y - this.start().y) - (this.center.y - this.start().y) * (this.end().x - this.start().x));
+
+      const labelPoint = { x: midpoint.x + r * centerSide * normalPerpendicular.x, y: midpoint.y + r * centerSide * normalPerpendicular.y };
+
+      this.htmlFillText(ctx, this.label, labelPoint.x, labelPoint.y);
     }
   }
 
@@ -191,11 +202,11 @@ class Edge {
 
   // Calculate distance from point to line segment
   distanceToMe(point) {
-    if (!isPointWithinSegment(point, this.start, this.end)) {
+    if (!isPointWithinSegment(point, this.start(), this.end())) {
       return NaN;
     }
 
-    return distanceToLine(point.x, point.y, this.start.x, this.start.y, this.end.x, this.end.y);
+    return distanceToLine(point.x, point.y, this.start().x, this.start().y, this.end().x, this.end().y);
   }
 
   checkMouseProximity(mouseX, mouseY) {

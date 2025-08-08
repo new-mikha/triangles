@@ -1,6 +1,15 @@
 class AngleBracket {
-  constructor(center, rotation) {
-    this.center = center;
+  constructor(points, iPoint, rotation) {
+    this.points = points;
+    this.iPoint = iPoint;
+    this.rotation = rotation;
+  }
+
+  center() {
+    return this.points[this.iPoint];
+  }
+
+  rotate(rotation) {
     this.rotation = rotation;
   }
 
@@ -19,9 +28,9 @@ class AngleBracket {
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(this.center.x + square[0][0], this.center.y + square[0][1]);
-    ctx.lineTo(this.center.x + square[1][0], this.center.y + square[1][1]);
-    ctx.lineTo(this.center.x + square[2][0], this.center.y + square[2][1]);
+    ctx.moveTo(this.center().x + square[0][0], this.center().y + square[0][1]);
+    ctx.lineTo(this.center().x + square[1][0], this.center().y + square[1][1]);
+    ctx.lineTo(this.center().x + square[2][0], this.center().y + square[2][1]);
     ctx.stroke();
   }
 }

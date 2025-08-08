@@ -48,6 +48,8 @@ class Triangle {
     this.colors.opposite2 = colorsArray[1];
 
     this.calcPositions();
+
+    this.setupElements();
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -55,6 +57,8 @@ class Triangle {
     this.rotation += angle;
     this.rotation = Math.round(this.rotation / (Math.PI / 20)) * (Math.PI / 20);
     this.rotation = this.rotation % (2 * Math.PI);
+    this.angleArc.rotate(this.rotation);
+    this.angleBracket.rotate(this.rotation);
     this.calcPositions();
   }
 
@@ -86,7 +90,7 @@ class Triangle {
     basePoints.forEach(point => { point.x -= cg.x; point.y -= cg.y; });
 
     // Apply rotation and translation
-    const points = basePoints.map(point => {
+    const newPoints = basePoints.map(point => {
       const rotatedX = point.x * Math.cos(this.rotation) - point.y * Math.sin(this.rotation);
       const rotatedY = point.x * Math.sin(this.rotation) + point.y * Math.cos(this.rotation);
       return {
@@ -95,27 +99,39 @@ class Triangle {
       };
     });
 
-    const realCenter = { x: (points[0].x + points[1].x + points[2].x) / 3, y: (points[0].y + points[1].y + points[2].y) / 3 };
+    if (!this.points) {
+      this.points = newPoints;
+    }
+    else {
+      this.points.forEach((point, i) => {
+        point.x = newPoints[i].x;
+        point.y = newPoints[i].y;
+      });
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  setupElements() {
+    const realCenter = { x: (this.points[0].x + this.points[1].x + this.points[2].x) / 3, y: (this.points[0].y + this.points[1].y + this.points[2].y) / 3 };
 
     this.edges = [
-      new Edge('adjacent', points[0], points[1], this.edgeLabels.adjacent, this.colors.adjacent, realCenter),
-      new Edge('opposite', points[0], points[2], this.edgeLabels.opposite, this.colors.opposite, realCenter)
+      new Edge('adjacent', this.points, 0, 1, this.edgeLabels.adjacent, this.colors.adjacent, realCenter),
+      new Edge('opposite', this.points, 0, 2, this.edgeLabels.opposite, this.colors.opposite, realCenter)
     ];
 
     if (this.hasOtherEdges) {
-      this.edges.push(new Edge('adjacent2', points[3], points[2], this.edgeLabels.adjacent2, this.colors.adjacent2, realCenter));
-      this.edges.push(new Edge('opposite2', points[3], points[1], this.edgeLabels.opposite2, this.colors.opposite2, realCenter));
+      this.edges.push(new Edge('adjacent2', this.points, 3, 2, this.edgeLabels.adjacent2, this.colors.adjacent2, realCenter));
+      this.edges.push(new Edge('opposite2', this.points, 3, 1, this.edgeLabels.opposite2, this.colors.opposite2, realCenter));
     }
 
     // add at the end to it's on top of everything else in Z-order:
-    this.edges.push(new Edge('hypotenuse', points[2], points[1], this.edgeLabels.hypotenuse, this.colors.hypotenuse, realCenter, this.hasOtherEdges));
+    this.edges.push(new Edge('hypotenuse', this.points, 2, 1, this.edgeLabels.hypotenuse, this.colors.hypotenuse, realCenter, this.hasOtherEdges));
 
-    this.angleArc = new AngleArc(points[1], this.rotation, this.angleA, this.angleLabel);
-    this.angleBracket = new AngleBracket(points[0], this.rotation);
+    this.angleArc = new AngleArc(this.points, 1, this.rotation, this.angleA, this.angleLabel);
+    this.angleBracket = new AngleBracket(this.points, 0, this.rotation);
   }
 
-
-  // Check if mouse is near any edge
+  //////////////////////////////////////////////////////////////////////////////
   checkMouseProximity(mouseX, mouseY) {
     if (this.answer)
       return;
