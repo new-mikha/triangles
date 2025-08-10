@@ -22,15 +22,20 @@ function generateQuestion() {
     }
   }
 
-  const hasNumbers = Math.random() < 0.5;
+  const hasSpecificNumbers = Math.random() < 0.5;
 
   let angleLabel;
-  if (hasNumbers) {
+  let randomLabels;
+
+  if (hasSpecificNumbers) {
     const angleFigure = Math.round(radToDeg(angleA));
     angleLabel = angleFigure + DEGREES_SYMBOL;
   } else {
     const allGreekLetters = ['α', 'β', 'γ', 'θ', 'ε', 'δ', 'ϕ', 'χ', 'ω'];
-    angleLabel = allGreekLetters[Math.floor(Math.random() * allGreekLetters.length)];
+    allGreekLetters.sort(() => Math.random() - 0.5);
+    angleLabel = allGreekLetters[0];
+    randomLabels = allGreekLetters.slice(0, 3);
+    randomLabels.sort(() => Math.random() - 0.5);
   }
 
   const hasOtherEdges = Math.random() < 0.5;
@@ -72,7 +77,7 @@ function generateQuestion() {
   } else if (type === 'formula') {
 
     let l;
-    if (hasNumbers) {
+    if (hasSpecificNumbers) {
       l = 20 + Math.floor(Math.random() * 50);
       edgeLabels.hypotenuse = l + ' ' + unit;
     } else {
@@ -81,7 +86,7 @@ function generateQuestion() {
     }
 
     const unknownTerm = edgeLabelsArray[1];
-    const unknownEdgeLabel = hasNumbers ? `<i>${unknownTerm}</i> ${unit}` : unknownTerm;
+    const unknownEdgeLabel = hasSpecificNumbers ? `<i>${unknownTerm}</i> ${unit}` : unknownTerm;
     text = `What will be <i>${unknownTerm}</i>`;
     textAnswer = `${unknownTerm} = ${l} * ${func}(${angleLabel.replace(DEGREES_SYMBOL, '')})`;
 
@@ -99,5 +104,8 @@ function generateQuestion() {
 
   }
 
-  return { angleA, question: { type, func, reversed }, edgeLabels, angleLabel, hasOtherEdges, text, textAnswer };
+  return {
+    angleA, question: { type, func, reversed, hasSpecificNumbers },
+    edgeLabels, angleLabel, hasOtherEdges, text, textAnswer, randomLabels
+  };
 }

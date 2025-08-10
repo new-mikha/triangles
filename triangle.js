@@ -3,12 +3,13 @@ class Triangle {
   //////////////////////////////////////////////////////////////////////////////
   constructor() {
 
-    const { angleA, question, edgeLabels, hasOtherEdges, angleLabel, text, textAnswer } = generateQuestion();
+    const { angleA, question, edgeLabels, hasOtherEdges, angleLabel, text, textAnswer, randomLabels } = generateQuestion();
     this.angleA = angleA;
     this.question = question;
     this.edgeLabels = edgeLabels;
     this.hasOtherEdges = hasOtherEdges;
     this.angleLabel = angleLabel;
+    this.randomLabels = randomLabels;
     this.questionText = text;
     this.textAnswer = textAnswer;
     //rotation = 25 * Math.PI / 180;
@@ -134,8 +135,8 @@ class Triangle {
     }
 
     // add at the end to it's on top of everything else in Z-order:
-    this.edges.push(new Edge('hypotenuse', this.points[2], this.points[1], 
-      this.edgeLabels.hypotenuse, this.colors.hypotenuse, this.triangleCenter, 
+    this.edges.push(new Edge('hypotenuse', this.points[2], this.points[1],
+      this.edgeLabels.hypotenuse, this.colors.hypotenuse, this.triangleCenter,
       this.hasOtherEdges, this.angleA));
 
     this.angleArc = new AngleArc(this.points[1], this.rotation, this.angleA, this.angleLabel, this.mirrorFactor);

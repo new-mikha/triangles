@@ -128,6 +128,15 @@ class TriangleApp {
       if (!this.triangle.answer) {
         show('answerInputContainer');
         hide('answerResultContainer');
+
+        if (!this.triangle.randomLabels) {
+          hide('angleLabels');
+        } else {
+          show('angleLabels');
+          document.getElementById('angleLabels').innerHTML =
+            "(" + this.triangle.randomLabels.join(' ') + ")";
+        }
+
         document.getElementById('answerInput').value = '';
       } else {
         hide('answerInputContainer');
