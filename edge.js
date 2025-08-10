@@ -61,7 +61,7 @@ class Edge {
 
     if (this.label) {
 
-      const r = this.moveLabelToEnd ? 25 : 25;
+      const r = this.moveLabelToEnd ? 10 : 25;
 
       const startWeight = 1;
       const endWeight = this.moveLabelToEnd ? 0.6 : 1;
