@@ -20,18 +20,19 @@ function isPointWithinSegment(p, a, b) {
 }
 
 class Edge {
-  constructor(name, start, end, label, color, triangleCenter, moveLabelToEnd) {
+  constructor(name, start, end, label, color, triangleCenter, moveLabelToEnd, angleA) {
     this.name = name;
     this.start = start;
     this.end = end;
     this.label = label;
     this.color = color;
-    this.center = triangleCenter;
+    this.triangleCenter = triangleCenter;
 
     this.isFullOn = true;
     this.isFlickering = false;
     this.lastFlickerTime = 0;
     this.moveLabelToEnd = moveLabelToEnd;
+    this.angleA = angleA;
   }
 
   draw(ctx) {
@@ -54,17 +55,26 @@ class Edge {
 
       const r = this.moveLabelToEnd ? 10 : 25;
 
-      const startWeight = 1;
-      const endWeight = this.moveLabelToEnd ? 0.6 : 1;
+      let startWeight, endWeight;
+      if (!this.moveLabelToEnd) {
+        startWeight = 1;
+        endWeight = 1;
+      } else if (this.angleA > Math.PI / 4) {
+        startWeight = 1;
+        endWeight = 0.6;
+      } else {
+        startWeight = 0.6;
+        endWeight = 1;
+      }
 
-      const midpoint = { 
-        x: (this.start.x * startWeight + this.end.x * endWeight) / (startWeight + endWeight), 
-        y: (this.start.y * startWeight + this.end.y * endWeight) / (startWeight + endWeight) 
+      const midpoint = {
+        x: (this.start.x * startWeight + this.end.x * endWeight) / (startWeight + endWeight),
+        y: (this.start.y * startWeight + this.end.y * endWeight) / (startWeight + endWeight)
       };
       const segmentVector = { x: this.end.x - this.start.x, y: this.end.y - this.start.y };
       const length = Math.hypot(segmentVector.x, segmentVector.y);
       const normalPerpendicular = { x: -segmentVector.y / length, y: segmentVector.x / length };
-      const centerSide = Math.sign((this.center.x - this.start.x) * (this.end.y - this.start.y) - (this.center.y - this.start.y) * (this.end.x - this.start.x));
+      const centerSide = Math.sign((this.triangleCenter.x - this.start.x) * (this.end.y - this.start.y) - (this.triangleCenter.y - this.start.y) * (this.end.x - this.start.x));
 
       const labelPoint = { x: midpoint.x + r * centerSide * normalPerpendicular.x, y: midpoint.y + r * centerSide * normalPerpendicular.y };
 
