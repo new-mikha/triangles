@@ -101,7 +101,7 @@ class TriangleApp {
     const answerType = this.triangle.answerType;
     let displayResult = '';
 
-    if (this.triangle.question.type !== 'specific-numbers') {
+    if (this.triangle.question.type !== 'formula') {
       if (!this.triangle.answer) {
         hide('answerOverlay');
       } else {
@@ -202,7 +202,7 @@ class TriangleApp {
   /////////////////////////////////////////////////////////////////////////////
   handleTextAnswer(answer) {
     if (!this.triangle || this.triangle.answer ||
-      this.triangle.question.type !== 'specific-numbers' ||
+      this.triangle.question.type !== 'formula' ||
       !answer || answer.trim() === '')  //
     {
       return;

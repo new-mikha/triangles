@@ -3,11 +3,11 @@ function generateQuestion() {
 
   const types = [
     'simple',
-    'specific-numbers'
+    'formula'
   ];
   const type = types[Math.floor(Math.random() * types.length)];
 
-  const reversed = Math.random() < 0.5;
+  const reversed = true; // Math.random() < 0.5;
 
   const edgeLabelsArray =
     ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -22,8 +22,16 @@ function generateQuestion() {
     }
   }
 
-  const allGreekLetters = ['α', 'β', 'γ', 'θ', 'ε', 'δ', 'ϕ', 'χ', 'ω'];
-  let angleLabel = allGreekLetters[Math.floor(Math.random() * allGreekLetters.length)];
+  const hasNumbers = Math.random() < 0.5;
+
+  let angleLabel;
+  if (hasNumbers) {
+    const angleFigure = Math.round(radToDeg(angleA));
+    angleLabel = angleFigure + DEGREES_SYMBOL;
+  } else {
+    const allGreekLetters = ['α', 'β', 'γ', 'θ', 'ε', 'δ', 'ϕ', 'χ', 'ω'];
+    angleLabel = allGreekLetters[Math.floor(Math.random() * allGreekLetters.length)];
+  }
 
   const hasOtherEdges = Math.random() < 0.5;
 
@@ -48,12 +56,6 @@ function generateQuestion() {
     else
       text = `<span class="bold-text">${edgeLabels.hypotenuse} * ${func}(${angleLabel})</span> projects onto which leg?`;
   } else if (type === 'simple' && reversed) {
-
-    if (Math.random() < 0.5) {
-      const angleFigure = Math.round(radToDeg(angleA));
-      angleLabel = angleFigure + DEGREES_SYMBOL;
-    }
-
     if (func === 'sin') {
       if (hasOtherEdges)
         edgeLabels.opposite2 = legLabel;
@@ -67,17 +69,21 @@ function generateQuestion() {
     }
 
     text = `<span class="bold-text">${legLabel} = <i>${hypotenuse}</i> * ${func}(${angleLabel})</span>. Which side is <span class="bold-text"><i>${hypotenuse}</i></span>&nbsp;?`;
-  } else if (type === 'specific-numbers') {
+  } else if (type === 'formula') {
 
-    const l = 20 + Math.floor(Math.random() * 50);
-    edgeLabels.hypotenuse = l + ' ' + unit;
-    const angleFigure = Math.round(radToDeg(angleA));
-    angleLabel = angleFigure + DEGREES_SYMBOL;
+    let l;
+    if (hasNumbers) {
+      l = 20 + Math.floor(Math.random() * 50);
+      edgeLabels.hypotenuse = l + ' ' + unit;
+    } else {
+      l = hypotenuse;
+      edgeLabels.hypotenuse = hypotenuse;
+    }
 
-    const unknownTerm = edgeLabelsArray[0];
-    const unknownEdgeLabel = `<i>${unknownTerm}</i> ${unit}`;
+    const unknownTerm = edgeLabelsArray[1];
+    const unknownEdgeLabel = hasNumbers ? `<i>${unknownTerm}</i> ${unit}` : unknownTerm;
     text = `What will be <i>${unknownTerm}</i>`;
-    textAnswer = `${unknownTerm} = ${l} * ${func}(${angleFigure})`;
+    textAnswer = `${unknownTerm} = ${l} * ${func}(${angleLabel.replace(DEGREES_SYMBOL, '')})`;
 
     if (func === 'sin') {
       if (hasOtherEdges)

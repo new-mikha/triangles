@@ -147,7 +147,7 @@ class Triangle {
     if (this.answer)
       return;
 
-    if (this.question.type === 'specific-numbers')
+    if (this.question.type === 'formula')
       return;
 
     for (const edge of this.edges)
@@ -227,8 +227,8 @@ class Triangle {
 
   //////////////////////////////////////////////////////////////////////////////
   tryTextAnswer(answer) {
-    if (this.question.type !== 'specific-numbers') {
-      console.log(`Exepcted "specific-numbers" question type here, but got ${this.question.type} `);
+    if (this.question.type !== 'formula') {
+      console.log(`Exepcted "formula" question type here, but got ${this.question.type} `);
       this.answer = "error";
       this.answerType = "badBad";
       return;
