@@ -3,11 +3,11 @@ function generateQuestion() {
 
   const types = [
     'simple',
-   // 'specific-numbers'
+    'specific-numbers'
   ];
   const type = types[Math.floor(Math.random() * types.length)];
 
-  const reversed = false; // Math.random() < 0.5;
+  const reversed = Math.random() < 0.5;
 
   const edgeLabelsArray =
     ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -42,7 +42,7 @@ function generateQuestion() {
 
   if (type === 'simple' && !reversed) {
     edgeLabels.hypotenuse = edgeLabelsArray[0];
-    
+
     if (Math.random() < 0.5)
       text = `<span class="bold-text">${legLabel} = <i>${hypotenuse}</i> * ${func}(${angleLabel})</span>. Which side is <span class="bold-text"><i>${legLabel}</i></span>&nbsp;?`;
     else
