@@ -3,18 +3,23 @@ function generateQuestion() {
 
   const types = [
     'simple',
-    'reversed-simple',
-    'specific-numbers'
+   // 'specific-numbers'
   ];
   const type = types[Math.floor(Math.random() * types.length)];
+
+  const reversed = false; // Math.random() < 0.5;
 
   const edgeLabelsArray =
     ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
       'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
   edgeLabelsArray.sort(() => Math.random() - 0.5);
   for (let i = 0; i < edgeLabelsArray.length; i++) {
-    if (Math.random() < 0.3)
+    // uppercase i looks too similar to l with some fonts
+    if ((Math.random() < 0.3 && edgeLabelsArray[i] !== 'i') ||
+      edgeLabelsArray[i] === 'l') //
+    {
       edgeLabelsArray[i] = edgeLabelsArray[i].toUpperCase();
+    }
   }
 
   const allGreekLetters = ['α', 'β', 'γ', 'θ', 'ε', 'δ', 'ϕ', 'χ', 'ω'];
@@ -31,21 +36,24 @@ function generateQuestion() {
 
   let text = '';
   let textAnswer = '';
-  if (type === 'simple') {
+
+  const legLabel = edgeLabelsArray[1];
+  const hypotenuse = edgeLabelsArray[0];
+
+  if (type === 'simple' && !reversed) {
     edgeLabels.hypotenuse = edgeLabelsArray[0];
+    
     if (Math.random() < 0.5)
-      text = `Which leg corresponds to <span class="bold-text">${func}(${angleLabel})</span>?`;
+      text = `<span class="bold-text">${legLabel} = <i>${hypotenuse}</i> * ${func}(${angleLabel})</span>. Which side is <span class="bold-text"><i>${legLabel}</i></span>&nbsp;?`;
     else
       text = `<span class="bold-text">${edgeLabels.hypotenuse} * ${func}(${angleLabel})</span> projects onto which leg?`;
-  } else if (type === 'reversed-simple') {
-    const hypotenuse = edgeLabelsArray[0];
+  } else if (type === 'simple' && reversed) {
 
     if (Math.random() < 0.5) {
       const angleFigure = Math.round(radToDeg(angleA));
       angleLabel = angleFigure + DEGREES_SYMBOL;
     }
 
-    const legLabel = edgeLabelsArray[1];
     if (func === 'sin') {
       if (hasOtherEdges)
         edgeLabels.opposite2 = legLabel;
@@ -85,5 +93,5 @@ function generateQuestion() {
 
   }
 
-  return { angleA, question: { type, func }, edgeLabels, angleLabel, hasOtherEdges, text, textAnswer };
+  return { angleA, question: { type, func, reversed }, edgeLabels, angleLabel, hasOtherEdges, text, textAnswer };
 }

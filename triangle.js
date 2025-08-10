@@ -165,12 +165,11 @@ class Triangle {
       return;
 
     const isClickableQuestionType =
-      this.question.type === 'simple' ||
-      this.question.type === 'reversed-simple';
+      this.question.type === 'simple';
 
 
     if (!isClickableQuestionType) {
-      console.log(`Exepcted "simple" or "reversed-simple" question type here, but got ${this.question.type} `);
+      console.log(`Exepcted "simple" question type here, but got ${this.question.type} `);
       this.answer = "error";
       return "badBad";
     }
@@ -192,19 +191,18 @@ class Triangle {
     this.answer = selectedEdge.name;
 
     if (this.answer === 'hypotenuse') {
-      if (this.question.type === 'simple') {
-        this.answerType = "badBad";
-      } else {
+      if (this.question.reversed) {
         this.answerType = "good";
+      } else {
+        this.answerType = "badBad";
       }
       return;
     }
 
-    if (this.question.type === 'reversed-simple') {
+    if (this.question.reversed) {
       this.answerType = "bad";
       return;
     }
-
 
     const isOpposite = this.answer === 'opposite' || this.answer === 'opposite2';
     const isAdjacent = this.answer === 'adjacent' || this.answer === 'adjacent2';

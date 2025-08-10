@@ -182,8 +182,7 @@ class TriangleApp {
 
   handleMouseClick(event) {
     const isClickableQuestionType =
-      this.triangle.question.type === 'simple' ||
-      this.triangle.question.type === 'reversed-simple';
+      this.triangle.question.type === 'simple';
 
     if (!this.triangle || this.triangle.answer || !isClickableQuestionType)
       return;
