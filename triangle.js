@@ -116,20 +116,20 @@ class Triangle {
     const realCenter = { x: (this.points[0].x + this.points[1].x + this.points[2].x) / 3, y: (this.points[0].y + this.points[1].y + this.points[2].y) / 3 };
 
     this.edges = [
-      new Edge('adjacent', this.points, 0, 1, this.edgeLabels.adjacent, this.colors.adjacent, realCenter),
-      new Edge('opposite', this.points, 0, 2, this.edgeLabels.opposite, this.colors.opposite, realCenter)
+      new Edge('adjacent', this.points[0], this.points[1], this.edgeLabels.adjacent, this.colors.adjacent, realCenter),
+      new Edge('opposite', this.points[0], this.points[2], this.edgeLabels.opposite, this.colors.opposite, realCenter)
     ];
 
     if (this.hasOtherEdges) {
-      this.edges.push(new Edge('adjacent2', this.points, 3, 2, this.edgeLabels.adjacent2, this.colors.adjacent2, realCenter));
-      this.edges.push(new Edge('opposite2', this.points, 3, 1, this.edgeLabels.opposite2, this.colors.opposite2, realCenter));
+      this.edges.push(new Edge('adjacent2', this.points[3], this.points[2], this.edgeLabels.adjacent2, this.colors.adjacent2, realCenter));
+      this.edges.push(new Edge('opposite2', this.points[3], this.points[1], this.edgeLabels.opposite2, this.colors.opposite2, realCenter));
     }
 
     // add at the end to it's on top of everything else in Z-order:
-    this.edges.push(new Edge('hypotenuse', this.points, 2, 1, this.edgeLabels.hypotenuse, this.colors.hypotenuse, realCenter, this.hasOtherEdges));
+    this.edges.push(new Edge('hypotenuse', this.points[2], this.points[1], this.edgeLabels.hypotenuse, this.colors.hypotenuse, realCenter, this.hasOtherEdges));
 
-    this.angleArc = new AngleArc(this.points, 1, this.rotation, this.angleA, this.angleLabel, this.mirrorFactor);
-    this.angleBracket = new AngleBracket(this.points, 0, this.rotation, this.mirrorFactor);
+    this.angleArc = new AngleArc(this.points[1], this.rotation, this.angleA, this.angleLabel, this.mirrorFactor);
+    this.angleBracket = new AngleBracket(this.points[0], this.rotation, this.mirrorFactor);
   }
 
   //////////////////////////////////////////////////////////////////////////////
