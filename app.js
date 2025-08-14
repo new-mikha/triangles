@@ -1,22 +1,22 @@
 // Main application class for future enhancements
-class TriangleApp {
-  triangles = [];
+class DrawingApp {
+  drawings = [];
   current = 0;
 
   constructor() {
     this.canvas = document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');
-    this.triangle = null;
+    this.drawing = null;
     this.animationId = null;
 
     this.initializeEventListeners();
-    this.generateNewTriangle();
+    this.generateNewDrawing();
     this.startAnimation();
   }
 
   initializeEventListeners() {
     document.getElementById('newBtn').addEventListener('click', () => {
-      this.generateNewTriangle();
+      this.generateNewDrawing();
     });
 
     document.getElementById('backBtn').addEventListener('click', () => {
@@ -27,19 +27,21 @@ class TriangleApp {
       this.goNext();
     });
 
+    const allowRotationAnyway = new URLSearchParams(window.location.search).get('rotate') === 'true';
+
     // Global keyboard event listener for Enter and Space keys
     document.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
         event.preventDefault();
-        if (!this.triangle.answer) {
+        if (!this.drawing.answer && !allowRotationAnyway) {
           this.playChime(660, 660, 660);
           return;
         }
 
         if (event.key === 'ArrowUp')
-          this.triangle.rotate(-Math.PI / 20);
+          this.drawing.rotate(-Math.PI / 20);
         else
-          this.triangle.rotate(Math.PI / 20);
+          this.drawing.rotate(Math.PI / 20);
       }
 
       if (document.activeElement.id === 'answerInput') {
@@ -47,7 +49,7 @@ class TriangleApp {
       }
 
       if (event.key === 'Enter' || event.key === ' ') {
-        this.generateNewTriangle();
+        this.generateNewDrawing();
         event.preventDefault();
       }
 
@@ -60,6 +62,12 @@ class TriangleApp {
         this.goNext();
         event.preventDefault();
       }
+
+      if (event.key === 'G') {
+        console.log("Question: ", this.drawing.question);
+        event.preventDefault();
+      }
+
     });
 
     document.getElementById('submitBtn').addEventListener('click', (event) => {
@@ -74,16 +82,19 @@ class TriangleApp {
     this.canvas.addEventListener('click', this.handleMouseClick.bind(this));
   }
 
+  iTestGist = new URLSearchParams(window.location.search).get('gist') || 0;
 
-  generateNewTriangle() {
+  generateNewDrawing() {
     if (this.changeTimer)
       clearTimeout(this.changeTimer);
     this.changeTimer = null;
 
+    // const iTestGist = this.iTestGist++;
+    // const testGist = testGists[iTestGist];
 
-    this.triangle = new Triangle();
-    this.triangles.push(this.triangle);
-    this.current = this.triangles.length - 1;
+    this.drawing = new Drawing();
+    this.drawings.push(this.drawing);
+    this.current = this.drawings.length - 1;
 
     this.updateQuestion();
   }
@@ -92,17 +103,17 @@ class TriangleApp {
     const currentLabel = document.getElementById('currrentLabel');
     const countLabel = document.getElementById('countLabel');
     currentLabel.innerHTML = this.current + 1;
-    countLabel.innerHTML = this.triangles.length;
+    countLabel.innerHTML = this.drawings.length;
 
-    const questionText = document.getElementById('questionText');
+    const questionTextElement = document.getElementById('questionText');
 
-    questionText.innerHTML = this.triangle.questionText;
+    questionTextElement.innerHTML = this.drawing.question.prompt;
 
-    const answerType = this.triangle.answerType;
+    const answerType = this.drawing.answerType;
     let displayResult = '';
 
-    if (this.triangle.question.type !== 'formula') {
-      if (!this.triangle.answer) {
+    if (this.drawing.question.type !== 'formula') {
+      if (!this.drawing.answer) {
         hide('answerOverlay');
       } else {
         show('answerOverlay');
@@ -125,16 +136,16 @@ class TriangleApp {
     } else {
       show('answerOverlay');
 
-      if (!this.triangle.answer) {
+      if (!this.drawing.answer) {
         show('answerInputContainer');
         hide('answerResultContainer');
 
-        if (!this.triangle.randomLabels) {
+        if (!this.drawing.randomLabels) {
           hide('angleLabels');
         } else {
           show('angleLabels');
           document.getElementById('angleLabels').innerHTML =
-            "(" + this.triangle.randomLabels.join(' ') + ")";
+            "(" + this.drawing.randomLabels.join(' ') + ")";
         }
 
         document.getElementById('answerInput').value = '';
@@ -143,7 +154,7 @@ class TriangleApp {
         show('answerResultContainer');
         show('answerTextContainer');
 
-        document.getElementById('answerText').innerHTML = this.triangle.answer;
+        document.getElementById('answerText').innerHTML = this.drawing.answer;
 
         if (answerType === "good") {
           displayResult = '<span class="correct">✓</span> Correct</span>';
@@ -151,11 +162,11 @@ class TriangleApp {
         } else if (answerType === "bad") {
           displayResult = '<span class="incorrect">✗</span> Incorrect</span>';
           show('correctAnswer');
-          document.getElementById('correctAnswer').innerHTML = "Correct answer: " + this.triangle.textAnswer;
+          document.getElementById('correctAnswer').innerHTML = "Correct answer: " + this.drawing.textAnswer;
         } else if (answerType === "badBad") {
           displayResult = '<span class="incorrect">✗✗</span> Very Incorrect</span>';
           show('correctAnswer');
-          document.getElementById('correctAnswer').innerHTML = "Correct answer: " + this.triangle.textAnswer;
+          document.getElementById('correctAnswer').innerHTML = "Correct answer: " + this.drawing.textAnswer;
         } else {
           displayResult = 'InternalError';
         }
@@ -169,7 +180,7 @@ class TriangleApp {
   }
 
   handleMouseMove(event) {
-    if (this.triangle && !this.triangle.answer) {
+    if (this.drawing && !this.drawing.answer) {
       const rect = this.canvas.getBoundingClientRect();
       const scaleX = this.canvas.width / rect.width;
       const scaleY = this.canvas.height / rect.height;
@@ -177,13 +188,13 @@ class TriangleApp {
       const mouseX = (event.clientX - rect.left) * scaleX;
       const mouseY = (event.clientY - rect.top) * scaleY;
 
-      this.triangle.checkMouseProximity(mouseX, mouseY);
+      this.drawing.checkMouseProximity(mouseX, mouseY);
     }
   }
 
   handleMouseLeave(event) {
-    if (this.triangle)
-      this.triangle.handleMouseLeave();
+    if (this.drawing)
+      this.drawing.handleMouseLeave();
   }
 
   correctAnswers = 0;
@@ -191,9 +202,9 @@ class TriangleApp {
 
   handleMouseClick(event) {
     const isClickableQuestionType =
-      this.triangle.question.type === 'simple';
+      this.drawing.question.gist.type === 'click';
 
-    if (!this.triangle || this.triangle.answer || !isClickableQuestionType)
+    if (!this.drawing || this.drawing.answer || !isClickableQuestionType)
       return;
 
     const rect = this.canvas.getBoundingClientRect();
@@ -203,28 +214,28 @@ class TriangleApp {
     const mouseX = (event.clientX - rect.left) * scaleX;
     const mouseY = (event.clientY - rect.top) * scaleY;
 
-    this.triangle.tryAnswer(mouseX, mouseY);
+    this.drawing.tryAnswer(mouseX, mouseY);
 
     this.respondToAnswer();
   }
 
   /////////////////////////////////////////////////////////////////////////////
   handleTextAnswer(answer) {
-    if (!this.triangle || this.triangle.answer ||
-      this.triangle.question.type !== 'formula' ||
+    if (!this.drawing || this.drawing.answer ||
+      this.drawing.question.type !== 'formula' ||
       !answer || answer.trim() === '')  //
     {
       return;
     }
 
-    this.triangle.tryTextAnswer(answer);
+    this.drawing.tryTextAnswer(answer);
 
     this.respondToAnswer();
   }
 
   /////////////////////////////////////////////////////////////////////////////
   respondToAnswer() {
-    const answerType = this.triangle.answerType;
+    const answerType = this.drawing.answerType;
 
     if (answerType === "good") {
       this.goodChime();
@@ -253,7 +264,7 @@ class TriangleApp {
 
       this.changeTimer = setTimeout(() => {
         this.changeTimer = null;
-        this.generateNewTriangle();
+        this.generateNewDrawing();
         this.scheduledChangeTime = null;
       }, 1000);
     }
@@ -292,16 +303,16 @@ class TriangleApp {
   goBack() {
     if (this.current > 0) {
       this.current--;
-      this.triangle = this.triangles[this.current];
+      this.drawing = this.drawings[this.current];
       this.updateQuestion();
     }
   }
 
   /////////////////////////////////////////////////////////////////////////////
   goNext() {
-    if (this.current < this.triangles.length - 1) {
+    if (this.current < this.drawings.length - 1) {
       this.current++;
-      this.triangle = this.triangles[this.current];
+      this.drawing = this.drawings[this.current];
       this.updateQuestion();
     }
   }
@@ -320,14 +331,14 @@ class TriangleApp {
     // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw triangle
-    if (this.triangle) {
-      this.triangle.draw(this.ctx);
+    // Draw drawing
+    if (this.drawing) {
+      this.drawing.draw(this.ctx);
     }
   }
 }
 
 // Initialize the application when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-  new TriangleApp();
+  new DrawingApp();
 }); 

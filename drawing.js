@@ -1,20 +1,12 @@
-class Triangle {
+class Drawing {
 
   //////////////////////////////////////////////////////////////////////////////
-  constructor() {
+  constructor(suggestedGist) {
 
-    const { angleA, question, edgeLabels, hasOtherEdges, angleLabel, text, textAnswer, randomLabels } = generateQuestion();
-    this.angleA = angleA;
-    this.question = question;
-    this.edgeLabels = edgeLabels;
-    this.hasOtherEdges = hasOtherEdges;
-    this.angleLabel = angleLabel;
-    this.randomLabels = randomLabels;
-    this.questionText = text;
-    this.textAnswer = textAnswer;
+    this.question = generateQuestion(suggestedGist);
+
     //rotation = 25 * Math.PI / 180;
     this.rotation = Math.random() * 2 * Math.PI;
-    this.mirrorFactor = Math.random() < 0.5 ? 1 : -1;
 
     const canvas = document.getElementById('canvas');
 
@@ -55,32 +47,22 @@ class Triangle {
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  rotate(angle) {
-    this.rotation += angle;
-    this.rotation = Math.round(this.rotation / (Math.PI / 20)) * (Math.PI / 20);
-    this.rotation = this.rotation % (2 * Math.PI);
-    this.angleArc.rotate(this.rotation);
-    this.angleBracket.rotate(this.rotation);
-    this.calcPositions();
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
   calcPositions() {
-    // Calculate the three points of the triangle
-    const adjacent = this.size * Math.cos(this.angleA);
-    const opposite = this.size * Math.sin(this.angleA);
+    // Calculate the three points of the drawing
+    const adjacent = this.size * Math.cos(this.question.geometry.angleA);
+    const opposite = this.size * Math.sin(this.question.geometry.angleA);
 
     // Base points before rotation
     const basePoints = [
       { x: 0, y: 0 }, // Right angle
-      { x: this.mirrorFactor * adjacent, y: 0 }, // Adjacent leg end
+      { x: this.question.geometry.mirrorFactor * adjacent, y: 0 }, // Adjacent leg end
       { x: 0, y: opposite }  // Opposite leg end
     ];
 
     const cg = { x: basePoints[0].x + basePoints[1].x + basePoints[2].x, y: basePoints[0].y + basePoints[1].y + basePoints[2].y };
 
-    if (this.hasOtherEdges) {
-      basePoints.push({ x: this.mirrorFactor * adjacent, y: opposite });
+    if (this.question.gist.figureType === "rectangle") {
+      basePoints.push({ x: this.question.geometry.mirrorFactor * adjacent, y: opposite });
 
       cg.x += basePoints[3].x;
       cg.y += basePoints[3].y;
@@ -101,7 +83,7 @@ class Triangle {
       };
     });
 
-    const triangleCenter =
+    const drawingCenter =
     {
       x: (newPoints[0].x + newPoints[1].x + newPoints[2].x) / 3,
       y: (newPoints[0].y + newPoints[1].y + newPoints[2].y) / 3
@@ -109,15 +91,15 @@ class Triangle {
 
     if (!this.points) {
       this.points = newPoints;
-      this.triangleCenter = triangleCenter;
+      this.drawingCenter = drawingCenter;
     }
     else {
       this.points.forEach((point, i) => {
         point.x = newPoints[i].x;
         point.y = newPoints[i].y;
       });
-      this.triangleCenter.x = triangleCenter.x;
-      this.triangleCenter.y = triangleCenter.y;
+      this.drawingCenter.x = drawingCenter.x;
+      this.drawingCenter.y = drawingCenter.y;
     }
   }
 
@@ -125,22 +107,51 @@ class Triangle {
   setupElements() {
 
     this.edges = [
-      new Edge('adjacent', this.points[0], this.points[1], this.edgeLabels.adjacent, this.colors.adjacent, this.triangleCenter),
-      new Edge('opposite', this.points[0], this.points[2], this.edgeLabels.opposite, this.colors.opposite, this.triangleCenter)
+      new Edge('adjacent', this.points[0], this.points[1],
+        this.question.labels.renderEdgeLabels.adjacent, this.colors.adjacent, this.drawingCenter),
+      new Edge('opposite', this.points[0], this.points[2],
+        this.question.labels.renderEdgeLabels.opposite, this.colors.opposite, this.drawingCenter)
     ];
 
-    if (this.hasOtherEdges) {
-      this.edges.push(new Edge('adjacent2', this.points[3], this.points[2], this.edgeLabels.adjacent2, this.colors.adjacent2, this.triangleCenter));
-      this.edges.push(new Edge('opposite2', this.points[3], this.points[1], this.edgeLabels.opposite2, this.colors.opposite2, this.triangleCenter));
+    const isRectangle = this.question.gist.figureType === "rectangle";
+    if (isRectangle) {
+      this.edges.push(new Edge('adjacent2', this.points[3], this.points[2],
+        this.question.labels.renderEdgeLabels.adjacent2, this.colors.adjacent2, this.drawingCenter));
+      this.edges.push(new Edge('opposite2', this.points[3], this.points[1],
+        this.question.labels.renderEdgeLabels.opposite2, this.colors.opposite2, this.drawingCenter));
     }
 
     // add at the end to it's on top of everything else in Z-order:
     this.edges.push(new Edge('hypotenuse', this.points[2], this.points[1],
-      this.edgeLabels.hypotenuse, this.colors.hypotenuse, this.triangleCenter,
-      this.hasOtherEdges, this.angleA));
+      this.question.labels.renderEdgeLabels.hypotenuse, this.colors.hypotenuse, this.drawingCenter,
+      isRectangle, this.question.geometry.angleA));
 
-    this.angleArc = new AngleArc(this.points[1], this.rotation, this.angleA, this.angleLabel, this.mirrorFactor);
-    this.angleBracket = new AngleBracket(this.points[0], this.rotation, this.mirrorFactor);
+    if (this.question.labels.renderAngleLabel)
+      this.angleArc = new AngleArc(this.points[1], this.rotation, this.question.geometry.angleA,
+        this.question.labels.renderAngleLabel, this.question.geometry.mirrorFactor);
+
+    this.angleBracket = new AngleBracket(this.points[0], this.rotation, this.question.geometry.mirrorFactor);
+
+    this.apexLabels = [];
+
+    const addApexLabelIfNeeded = (iPoint, labelName) => {
+      if (!this.question.labels.apexLabels)
+        return;
+
+      if (!this.question.labels.apexLabels[labelName])
+        return;
+
+      if (iPoint >= this.points.length)
+        return;
+
+      this.apexLabels.push(new ApexLabel(this.points[iPoint], this.rotation,
+        this.question.labels.apexLabels[labelName], this.drawingCenter));
+    }
+
+    addApexLabelIfNeeded(1, 'main');
+    addApexLabelIfNeeded(2, 'opposite');
+    addApexLabelIfNeeded(0, 'right');
+    addApexLabelIfNeeded(3, 'rectangleRight');
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -156,6 +167,16 @@ class Triangle {
   }
 
   //////////////////////////////////////////////////////////////////////////////
+  rotate(angle) {
+    this.rotation += angle;
+    this.rotation = Math.round(this.rotation / (Math.PI / 20)) * (Math.PI / 20);
+    this.rotation = this.rotation % (2 * Math.PI);
+    this.angleArc.rotate(this.rotation);
+    this.angleBracket.rotate(this.rotation);
+    this.calcPositions();
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
   handleMouseLeave() {
     for (const edge of this.edges)
       edge.handleMouseLeave();
@@ -166,8 +187,13 @@ class Triangle {
     for (const edge of this.edges)
       edge.draw(ctx);
 
-    this.angleArc.draw(ctx);
+    if (this.angleArc)
+      this.angleArc.draw(ctx);
+
     this.angleBracket.draw(ctx);
+
+    for (const label of this.apexLabels)
+      label.draw(ctx);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -176,8 +202,7 @@ class Triangle {
       return;
 
     const isClickableQuestionType =
-      this.question.type === 'simple';
-
+      this.question.gist.type === 'click';
 
     if (!isClickableQuestionType) {
       console.log(`Exepcted "simple" question type here, but got ${this.question.type} `);
@@ -201,26 +226,7 @@ class Triangle {
     selectedEdge.makeAnswer();
     this.answer = selectedEdge.name;
 
-    if (this.answer === 'hypotenuse') {
-      if (this.question.reversed) {
-        this.answerType = "good";
-      } else {
-        this.answerType = "badBad";
-      }
-      return;
-    }
-
-    if (this.question.reversed) {
-      this.answerType = "bad";
-      return;
-    }
-
-    const isOpposite = this.answer === 'opposite' || this.answer === 'opposite2';
-    const isAdjacent = this.answer === 'adjacent' || this.answer === 'adjacent2';
-
-    if (this.question.func == 'sin' && isOpposite)
-      this.answerType = "good";
-    else if (this.question.func == 'cos' && isAdjacent)
+    if (this.answer.replace('2', '') == this.question.gist.to.replace('2', ''))
       this.answerType = "good";
     else
       this.answerType = "bad";

@@ -25,22 +25,23 @@ class AngleArc {
       endAngle = startAngle + this.angleA;
     }
 
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(this.center.x, this.center.y, arcRadius, startAngle, endAngle);
-    ctx.stroke();
+    if (this.label) {
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(this.center.x, this.center.y, arcRadius, startAngle, endAngle);
+      ctx.stroke();
 
-    const labelRadius = arcRadius + 15;
-    const labelAngle = (startAngle + endAngle) / 2;
-    const labelX = this.center.x + labelRadius * Math.cos(labelAngle);
-    const labelY = this.center.y + labelRadius * Math.sin(labelAngle);
+      const labelRadius = arcRadius + 15;
+      const labelAngle = (startAngle + endAngle) / 2;
+      const labelX = this.center.x + labelRadius * Math.cos(labelAngle);
+      const labelY = this.center.y + labelRadius * Math.sin(labelAngle);
 
-    ctx.fillStyle = 'black';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(this.label, labelX, labelY);
-
+      ctx.fillStyle = 'black';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this.label, labelX, labelY);
+    }
   }
 }
